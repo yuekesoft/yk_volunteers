@@ -1,0 +1,67 @@
+{template 'common/header'}
+<div class="main">
+    <form action="" method="post" class="form-horizontal form">
+        <div class="panel panel-default">
+            <div class="panel-heading">{if $item['id']}编辑家长{else}添加家长{/if}</div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">姓名</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="name" value="{$item['name']}" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">手机号</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="phone" value="{$item['phone']}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">孩子班级</label>
+                    <div class="col-sm-4">
+                        <input type="text" name="child_class" value="{$item['child_class']}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">志愿偏好时段</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="prefer_slots" value="{$item['prefer_slots']}" class="form-control" placeholder='如 ["Mon_morning","Fri_evening"]'>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">可被替补安排</label>
+                    <div class="col-sm-4">
+                        <label><input type="radio" name="can_substitute" value="1" {if $item['can_substitute']==1}checked{/if}> 是</label> &nbsp;
+                        <label><input type="radio" name="can_substitute" value="0" {if $item['can_substitute']==0}checked{/if}> 否</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">每周最多安排次数</label>
+                    <div class="col-sm-2">
+                        <input type="number" name="max_per_week" value="{$item['max_per_week']}" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">每周替补上限</label>
+                    <div class="col-sm-2">
+                        <input type="number" name="max_substitute_per_week" value="{$item['max_substitute_per_week']}" class="form-control">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="form-group col-sm-12">
+            <input type="submit" name="submit" value="保存" class="btn btn-primary col-lg-1" />
+            <a href="{php echo $this->createWebUrl('volunteers', ['op'=>'display']);}" class="btn btn-default" style="margin-left: 10px;">返回</a>
+            <input type="hidden" name="token" value="{$_W['token']}" />
+        </div>
+    </form>
+</div>
+{template 'common/footer'}

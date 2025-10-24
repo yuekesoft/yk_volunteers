@@ -1,0 +1,91 @@
+{template 'common/header'}
+            <div class="tab-pane active" id="tab-invitation">
+                <form id="form-invitation">
+                    <input type="hidden" name="op" value="invitation">
+                    <input type="hidden" name="id" value="{$meetingid}">
+                    <input type="hidden" name="token" value="<?php echo $_W['token']; ?>">
+                     <!-- 隐藏模板 -->
+                    <div id="tpl-image" style="display:none;">
+                      <div class="form-group bg-item">
+                        <label class="col-sm-2 control-label">背景图片</label>
+                        <div class="col-sm-10">
+                          {php echo tpl_form_field_image('bg_temp', 'VALUE_PLACEHOLDER');}
+                          <span class="help-block">选择背景图片</span>
+                        </div>
+                      </div>
+                    </div>   
+                     <!-- 隐藏模板 -->
+                    <div id="tpl-text" style="display:none;">
+                        <div class="form-group">
+                            <label class="col-sm-2 control-label">文字内容</label>
+                            <div class="col-sm-10">
+                                <?php echo tpl_ueditor('text_temp', 'TEXT_VALUE_PLACEHOLDER'); ?>
+                            </div>
+                        </div>
+                    </div>
+                   <div class="form-group">
+                            <label class="col-sm-2 control-label">文字内容</label>
+                            <div class="col-sm-10">
+                               {php echo tpl_ueditor('content');}
+                            </div>
+                        </div>                    
+                    
+                    <div id="page-list"></div>
+                    
+                    <button class="btn btn-success" type="button" id="add-page">+ 添加一页</button>
+                    <div class="form-group">
+                        <div class="col-sm-offset-2 col-sm-10">
+                            <button type="button" id="save-pages" class="btn btn-primary" data-form="form-invitation">保存邀请函</button>
+                            <a href="<?php echo $this->createWebUrl('meeting'); ?>" class="btn btn-default">返回</a>
+                        </div>    
+                    </div>
+                </form>                     
+            </div>
+
+
+
+
+
+//在Html页面上还需要调用一个组件函数，只不过是第一个参数传入空值，用于引用各种富文本编辑器的JS文件
+{php echo tpl_ueditor('')}
+
+<script type="text/javascript">
+<!--
+	// ueditoroption 这个变量是微擎定义好的百度编辑器的初始化参数，直接使用即可
+
+//-->
+
+
+$('#add-page').on('click', function(e){
+
+	var editor = UE.getEditor('content', ueditoroption);
+	
+    editor.addListener('contentChange', function() {
+    	//此处增加了侦听编辑器内容变化的事件
+        //do something 
+    });
+    
+    editor.addListener('ready', function(){
+    	//此处增加了侦听编辑器初始化的事件
+        //do something 
+    });
+    
+    var content = editor.getContent();
+
+    console.log('content'+content);
+
+});
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+{template 'common/footer'}

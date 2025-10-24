@@ -1,0 +1,195 @@
+{template 'common/header'}
+<style>
+    .assignment-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .day-card {
+        flex: 1 1 calc(50% - 10px);
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    
+    .day-card .card-header {
+        background: linear-gradient(90deg, #007bff, #00aaff);
+        color: #fff;
+        padding: 8px 12px;
+        font-weight: bold;
+        font-size: 15px;
+    }
+    
+    .day-card .card-body {
+        padding: 10px;
+    }
+    
+    .slot-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+        font-size: 14px;
+        border-left: 4px solid #ccc;
+        padding-left: 8px;
+    }
+    
+    .slot-item .icon {
+        margin-right: 6px;
+    }
+    
+    .slot-item.morning {
+        border-color: #e74c3c;
+        color: #e74c3c;
+    }
+    
+    .slot-item.afternoon {
+        border-color: #3498db;
+        color: #3498db;
+    }
+    
+    .slot-item.evening {
+        border-color: #333;
+        color: #333;
+    }
+    
+    @media (max-width: 768px) {
+        .day-card {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+
+<div class="week-nav" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 15px 0;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+        <button class="btn btn-default btn-lg" id="prevWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
+            <i class="fa fa-arrow-left"></i> 上一周
+        </button>
+        <button class="btn btn-primary btn-lg" id="currentWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
+            <i class="fa fa-calendar"></i> 本周
+        </button>
+        <button class="btn btn-default btn-lg" id="nextWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
+            下一周 <i class="fa fa-arrow-right"></i>
+        </button>
+    </div>
+    <div style="text-align:center;color:#888;font-size:13px; margin-top:5px;">
+        {php echo date('m月d日', strtotime($start_date));} ~ {php echo date('m月d日', strtotime($end_date));}
+    </div>
+    <div id="noDataMsg" style="display:none;color:#999;font-size:13px;margin-top:5px;">本周还未排班</div>
+</div>
+
+
+<script>
+    var currentWeekStart = '{php echo $_GPC["start_date"] ?: date("Y-m-d", strtotime("monday this week"));}';
+    var hasData = <?php echo $has_data ? 'true' : 'false'; ?>;
+    var direction = new URLSearchParams(window.location.search).get('dir'); // 判断来源方向
+
+    // 切换周
+    function changeWeek(offset, dir) {
+        let d = new Date(currentWeekStart);
+        d.setDate(d.getDate() + offset);
+        let newWeek = formatDate(d);
+        // 跳转到新周，同时带上方向参数
+        window.location.href = "{php echo $this->createMobileUrl('assignments_list', array());}&start_date=" + newWeek + "&dir=" + dir;
+    }
+
+    document.getElementById('prevWeekBtn').addEventListener('click', function() {
+        changeWeek(-7, 'prev');
+    });
+    document.getElementById('nextWeekBtn').addEventListener('click', function() {
+        changeWeek(7, 'next');
+    });
+
+    // 本周按钮（📅）
+    document.getElementById('currentWeekBtn').addEventListener('click', function() {
+        const today = new Date();
+        const day = today.getDay(); // 0=周日, 1=周一...
+        const diff = day === 0 ? -6 : 1 - day;
+        today.setDate(today.getDate() + diff);
+        const monday = formatDate(today);
+        window.location.href = "{php echo $this->createMobileUrl('assignments_list');}&start_date=" + monday;
+    });
+
+    function formatDate(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    // --- 数据检测 ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const prevBtn = document.getElementById('prevWeekBtn');
+        const nextBtn = document.getElementById('nextWeekBtn');
+        const noDataMsg = document.getElementById('noDataMsg');
+
+        if (!hasData) {
+            noDataMsg.style.display = 'block';
+            if (direction === 'next') {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('disabled');
+            } else if (direction === 'prev') {
+                prevBtn.disabled = true;
+                prevBtn.classList.add('disabled');
+            }
+        } else {
+            noDataMsg.style.display = 'none';
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+            prevBtn.classList.remove('disabled');
+            nextBtn.classList.remove('disabled');
+        }
+    });
+</script>
+
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        {if $has_data}
+        <div class="assignment-grid">
+            {loop $grouped_assignments $date $slots}
+            <div class="day-card">
+                <div class="card-header">
+                    {$date}（{php echo ['Sun'=>'周日','Mon'=>'周一','Tue'=>'周二','Wed'=>'周三','Thu'=>'周四','Fri'=>'周五','Sat'=>'周六'][date('D', strtotime($date))];}）
+                </div>
+
+                <div class="card-body">
+                    {loop $slots $s}
+                    <div class="slot-item {$s['slot_code']}" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span class="icon">
+                                {if $s['slot_code']=='morning'}🕗
+                                {elseif $s['slot_code']=='afternoon'}🌇
+                                {elseif $s['slot_code']=='evening'}🌙
+                                {/if}
+                            </span>
+                            <strong>
+                                {if $s['slot_code']=='morning'}早上
+                                {elseif $s['slot_code']=='afternoon'}旁晚
+                                {elseif $s['slot_code']=='evening'}晚上
+                                {else}{$s['slot_code']}{/if}
+                            </strong> ：{$s['volunteer_name']}（{$s['volunteer_child_class']}）
+                        </div>
+
+                        {if $s['checked_in']==1}
+                        <div class="text-success" style="display:flex; align-items:center; margin-left:10px;">
+                            <i class="fa fa-check-circle" style="margin-right:3px;"></i>
+                            <span>已签到</span>
+                        </div>
+                        {/if}
+                    </div>
+                    {/loop}
+                </div>
+            </div>
+            {/loop}
+        </div>
+        {else}
+        <div style="text-align:center; padding:40px 0; color:#999;">
+            <i class="fa fa-calendar-times" style="font-size:50px; display:block; margin-bottom:10px; color:#ccc;"></i> 📭 本周还未排班<br>
+            <small>请等待管理员生成排班表</small>
+        </div>
+        {/if}
+    </div>
+</div>

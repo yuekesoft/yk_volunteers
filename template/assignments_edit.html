@@ -1,0 +1,89 @@
+{template 'common/header'}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="panel panel-default">
+    <div class="panel-heading">{if $item['id']}编辑排班{else}添加排班{/if}</div>
+
+    <div class="panel-body">
+        <form action="" method="post" class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">日期</label>
+                <div class="col-sm-4">
+                    <input type="date" name="date" value="{$item['date']}" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">星期</label>
+                <div class="col-sm-4">
+                    <select name="weekday" class="form-control">
+            {php $weekMap=[1=>'周一',2=>'周二',3=>'周三',4=>'周四',5=>'周五'];}
+            {loop $weekMap $k $v}
+            <option value="{$k}" {if $item['weekday']==$k}selected{/if}>{$v}</option>
+            {/loop}
+          </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">时段</label>
+                <div class="col-sm-4">
+                    <select name="slot_code" class="form-control">
+            <option value="morning" {if $item['slot_code']=='morning'}selected{/if}>早上</option>
+            <option value="afternoon" {if $item['slot_code']=='afternoon'}selected{/if}>旁晚</option>
+            <option value="evening" {if $item['slot_code']=='evening'}selected{/if}>晚上</option>
+          </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">志愿者</label>
+                <div class="col-sm-4">
+                    <select name="volunteer_id" class="form-control" required>
+                        {loop $volunteers $v}
+                        <option value="{$v['id']}" {if $item['volunteer_id']==$v['id']}selected{/if}>{$v['name']} ({$v['child_class']})</option>
+                        {/loop}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">角色</label>
+                <div class="col-sm-4">
+                    <select name="role" class="form-control">
+            <option value="primary" {if $item['role']=='primary'}selected{/if}>主值</option>
+            <option value="substitute" {if $item['role']=='substitute'}selected{/if}>替补</option>
+          </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">状态</label>
+                <div class="col-sm-4">
+                    <select name="status" class="form-control">
+            <option value="scheduled" {if $item['status']=='scheduled'}selected{/if}>已安排</option>
+            <option value="cancelled" {if $item['status']=='cancelled'}selected{/if}>取消</option>
+            <option value="completed" {if $item['status']=='completed'}selected{/if}>完成</option>
+          </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">签到</label>
+                <div class="col-sm-4">
+                    <input type="checkbox" name="checked_in" value="1" {if $item[ 'checked_in']}checked{/if}>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-4">
+                    <button type="submit" class="btn btn-success">保存</button>
+                    <a href="{php echo $this->createWebUrl('assignments',['op'=>'display']);}" class="btn btn-default">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{template 'common/footer'}

@@ -1,0 +1,402 @@
+{template 'common/header'}
+<style>
+    .day-card {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .slot-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    .slot-item:last-child {
+        border-bottom: none;
+    }
+</style>
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        <div class="form-inline" style="margin-bottom:10px;">
+            <label>选择起始日期：</label>
+            <input type="date" id="auto_date" class="form-control" value="{date('Y-m-d')}">
+            <label>模式：</label>
+            <select id="auto_mode" class="form-control">
+                <option value="week">周排班</option>
+                <option value="month">月排班</option>
+            </select>
+            <button id="btn_auto_assign" class="btn btn-success"><i class="fa fa-cogs"></i> 自动排班</button>
+            <a href="{php echo $this->createWebUrl('assignments',['op'=>'add']);}" class="btn btn-success btn-sm pull-right"><i class="fa fa-plus"></i> 手工添加排班</a>
+        </div>
+    </div>
+
+    <div class="panel-body table-responsive">
+
+        <style>
+            .assignment-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 15px;
+            }
+            
+            .day-card {
+                border: 1px solid #e6e6e6;
+                border-radius: 10px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+                overflow: hidden;
+            }
+            
+            .day-card .card-header {
+                font-weight: bold;
+                font-size: 15px;
+                padding: 10px 15px;
+                background: #007bff;
+                color: #fff;
+            }
+            
+            .day-card .card-body {
+                padding: 12px 15px;
+                background: #fff;
+            }
+            
+            .slot-item {
+                position: relative;
+                padding: 6px 10px 6px 14px;
+                border-bottom: 1px dashed #efefef;
+                display: flex;
+                align-items: center;
+                line-height: 1.6;
+            }
+            
+            .slot-item:last-child {
+                border-bottom: none;
+            }
+            /* 左侧色条 */
+            
+            .slot-item::before {
+                content: "";
+                width: 4px;
+                height: 18px;
+                border-radius: 2px;
+                margin-right: 8px;
+            }
+            
+            .slot-morning::before {
+                background-color: #d9534f;
+                /* 红 */
+            }
+            
+            .slot-afternoon::before {
+                background-color: #0275d8;
+                /* 蓝 */
+            }
+            
+            .slot-evening::before {
+                background-color: #444;
+                /* 黑 */
+            }
+            /* 图标样式 */
+            
+            .slot-icon {
+                margin-right: 6px;
+                font-size: 14px;
+            }
+            
+            .slot-morning .slot-icon {
+                color: #d9534f;
+            }
+            
+            .slot-afternoon .slot-icon {
+                color: #0275d8;
+            }
+            
+            .slot-evening .slot-icon {
+                color: #444;
+            }
+            /* 字体颜色 */
+            
+            .slot-morning strong {
+                color: #d9534f;
+            }
+            
+            .slot-afternoon strong {
+                color: #0275d8;
+            }
+            
+            .slot-evening strong {
+                color: #000000;
+            }
+            
+            .slot-item span {
+                color: #666;
+            }
+        </style>
+
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+
+                <!-- 左侧：搜索表单 -->
+                <div style="flex-grow:1; min-width: 300px;">
+                    <form action="" method="get" class="form-inline" style="margin:0;">
+                        <input type="hidden" name="c" value="site">
+                        <input type="hidden" name="a" value="entry">
+                        <input type="hidden" name="m" value="yk_volunteers">
+                        <input type="hidden" name="do" value="assignments">
+                        <input type="hidden" name="op" value="display">
+
+                        <div class="form-group" style="margin-right:10px;">
+                            <label>日期：</label>
+                            <input type="date" name="date" value="{$_GPC['date']}" class="form-control">
+                        </div>
+
+                        <div class="form-group" style="margin-right:10px;">
+                            <label>志愿者：</label>
+                            <input type="text" name="keyword" class="form-control" placeholder="姓名 / 手机号 / 时段偏好" value="{$_GPC['keyword']}">
+                        </div>
+
+                        <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                    </form>
+                </div>
+
+                <!-- 右侧：切换视图按钮 -->
+                <div style="text-align: right;">
+                    <button id="toggleViewBtn" class="btn btn-default btn-sm" style="white-space: nowrap;">
+                   <i class="fa fa-th"></i> 切换卡片视图
+               </button>
+                </div>
+
+            </div>
+
+
+
+            <!-- 卡片视图 -->
+            <div id="cardView" style="display:none;">
+                <div class="panel-body">
+                    <div class="assignment-grid">
+                        {loop $grouped_assignments $date $slots}
+                        <div class="card day-card">
+                            <div class="card-header bg-primary text-white">{$date}（{php echo ['周日','周一','周二','周三','周四','周五','周六'][date('w', strtotime($date))];}）</div>
+                            <div class="card-body">
+                                <!-- 固定顺序：morning, afternoon, evening -->
+
+                                {if empty($slots['morning'])}<span style="color:#999">暂无志愿者</span> {else} {loop $slots['morning'] $s}
+                                <div class="slot-item slot-morning ">
+                                    <i class="fa fa-clock-o slot-icon"></i>
+                                    <strong>早上</strong>：
+                                    <span class="slot-morning slot-icon">{$s['volunteer_name']}（{$s['volunteer_child_class']}）</span> {if $s['checked_in']==1}
+                                    <span class="text-success" style="margin-left:5px;">
+                                        <i class="fa fa-check-circle"></i> 已签到
+                                    </span> {/if} </div>{/loop} {/if} {if empty($slots['afternoon'])}<span style="color:#999">暂无志愿者</span> {else} {loop $slots['afternoon'] $s}
+
+                                <div class="slot-item slot-afternoon">
+                                    <i class="fa fa-clock-o slot-icon"></i>
+                                    <strong>旁晚</strong>：
+                                    <span class="slot-afternoon slot-icon">{$s['volunteer_name']}（{$s['volunteer_child_class']}）</span> {if $s['checked_in']==1}
+                                    <span class="text-success" style="margin-left:5px;">
+                                        <i class="fa fa-check-circle"></i> 已签到
+                                    </span> {/if}
+                                </div>{/loop} {/if} {if empty($slots['evening'])}<span style="color:#999">暂无志愿者</span> {else} {loop $slots['evening'] $s}
+
+                                <div class="slot-item slot-evening">
+                                    <i class="fa fa-clock-o slot-icon"></i>
+                                    <strong>晚上</strong>：
+                                    <span class="slot-evening slot-icon">{$s['volunteer_name']}（{$s['volunteer_child_class']}）</span> {if $s['checked_in']==1}
+                                    <span class="text-success" style="margin-left:5px;">
+                                        <i class="fa fa-check-circle"></i> 已签到
+                                    </span> {/if}
+                                </div>{/loop} {/if}
+                            </div>
+                        </div>
+                        {/loop}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 列表视图 -->
+        <div id="tableView">
+            <div class="clearfix" style="margin-bottom:10px;">
+                <button id="selectAllBtn" class="btn btn-default btn-sm">
+                    <i class="fa fa-check-square-o"></i> 全选
+                </button>
+                <button id="batchCheckinBtn" class="btn btn-success btn-sm">
+                    <i class="fa fa-check"></i> 签到
+                </button>
+                <button id="undoCheckInBtn" class="btn btn-warning">
+                    <i class="fa fa-undo"></i> 撤销签到
+                </button>
+            </div>
+            <table class="table table-hover table-bordered" style="margin-top:10px;">
+                <thead class="bg-light">
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" id="selectAll"></th>
+                        <th>ID</th>
+                        <th>日期</th>
+                        <th>星期</th>
+                        <th>时段</th>
+                        <th>志愿者</th>
+                        <th>孩子班级</th>
+                        <th>角色</th>
+                        <th>状态</th>
+                        <th>签到</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loop $list $item}
+                    <tr>
+                        <td><input type="checkbox" class="row-check" value="{$item['id']}"></td>
+                        <td>{$item['id']}</td>
+                        <td>{$item['date']}</td>
+                        <td>{$weekMap[$item['weekday']]}</td>
+                        <td>
+                            {if $item['slot_code'] == 'morning'} 早上 {elseif $item['slot_code'] == 'afternoon'} 旁晚 {elseif $item['slot_code'] == 'evening'} 晚上 {else} - {/if}
+                        </td>
+                        <td>{$item['volunteer_name']}</td>
+                        <td>{$item['volunteer_child_class']}</td>
+                        <td>{if $item['role'] == 'primary'} 主值 {elseif $item['role'] == 'substitute'} 替补 {else} - {/if}</td>
+                        <td>{if $item['status'] == 'scheduled'} 已安排 {elseif $item['status'] == 'cancelled'} 已取消 {elseif $item['status'] == 'completed'} 已完成 {else} - {/if}</td>
+                        <td>{if $item['checked_in']}<i class="fa fa-check-circle" style="margin-right:5px;"></i>已签到{else}未签到{/if}</td>
+                        <td>
+                            <a href="{php echo $this->createWebUrl('assignments',['op'=>'edit','id'=>$item['id']]);}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
+                            <a href="{php echo $this->createWebUrl('assignments',['op'=>'delete','id'=>$item['id'],'volunteer_id'=>$item['volunteer_id']]);}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除？');"><i class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {/loop}
+                </tbody>
+            </table>
+        </div>
+
+
+        <div class="text-right">{$pager}</div>
+    </div>
+</div>
+<!-- 自动排班按钮 -->
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#btn_auto_assign').click(function() {
+            var start_date = $('#auto_date').val();
+            var mode = $('#auto_mode').val();
+            if (!start_date) {
+                alert('请选择起始日期');
+                return;
+            }
+
+            if (confirm('确认生成' + (mode == 'week' ? '本周' : '本月') + '排班吗？')) {
+                $.post("<?php echo $this->createWebUrl('assignments',['op'=>'auto_assign']); ?>", {
+                        start_date: start_date,
+                        mode: mode
+                    },
+                    function(resp) {
+                        if (resp.status == 1) {
+                            alert(resp.message);
+                            location.reload();
+                        } else {
+                            alert('排班失败：' + resp.msg);
+                        }
+                    }, 'json');
+            }
+        });
+    });
+</script>
+
+<!-- 切换显示 -->
+<script>
+    $(function() {
+        let currentView = 'table'; // 默认是表格视图
+
+        $('#toggleViewBtn').on('click', function() {
+            if (currentView === 'table') {
+                $('#tableView').hide();
+                $('#cardView').fadeIn();
+                $(this).html('<i class="fa fa-list"></i> 切换列表视图');
+                currentView = 'card';
+            } else {
+                $('#cardView').hide();
+                $('#tableView').fadeIn();
+                $(this).html('<i class="fa fa-th"></i> 切换卡片视图');
+                currentView = 'table';
+            }
+        });
+    });
+</script>
+
+<!-- 全选和签到 撤销签到 -->
+<script>
+    $(function() {
+        // ✅ 全选按钮
+        $('#selectAll, #selectAllBtn').on('click', function() {
+            const checked = $(this).is(':checked') || $(this).attr('id') === 'selectAllBtn';
+            $('.row-check').prop('checked', checked);
+            $('#selectAll').prop('checked', checked);
+        });
+
+        // ✅ 批量签到按钮
+        $('#batchCheckinBtn').on('click', function() {
+            const ids = $('.row-check:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (ids.length === 0) {
+                alert('请先选择要签到的家长记录！');
+                return;
+            }
+
+            if (!confirm('确定要为选中的 ' + ids.length + ' 条记录签到吗？')) {
+                return;
+            }
+
+            $.post("{php echo $this->createWebUrl('assignments', array('op'=>'batch_checkin'));}", {
+                ids: ids
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    if (data.status == 'success') {
+                        alert('签到成功！');
+                        location.reload();
+                    } else {
+                        alert('签到失败：' + (data.message || '未知错误'));
+                    }
+                } catch (e) {
+                    alert('请求出错！');
+                    console.log(res);
+                }
+            });
+        });
+
+        // 批量撤销签到
+        $('#undoCheckInBtn').click(function() {
+            const ids = $('.row-check:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (ids.length === 0) {
+                alert('请先选择要撤销签到的记录');
+                return;
+            }
+            if (!confirm('确认要撤销选中志愿者的签到吗？')) return;
+
+            $.post("{php echo $this->createWebUrl('assignments', array('op'=>'batch_uncheckin'));}", {
+                ids: ids
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    if (data.status == 'success') {
+                        alert('撤销签到成功！');
+                        location.reload();
+                    } else {
+                        alert('撤销签到失败：' + (data.message || '未知错误'));
+                    }
+                } catch (e) {
+                    alert('请求出错！');
+                    console.log(res);
+                }
+            });
+        });
+    });
+</script>
+
+{template 'common/footer'}

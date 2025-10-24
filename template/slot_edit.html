@@ -1,0 +1,107 @@
+{template 'common/header'}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        {if !empty($item['id'])}编辑时段{else}添加时段{/if}
+    </div>
+
+    <div class="panel-body">
+        <form action="" method="post" class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="col-sm-2 control-label">星期</label>
+                <div class="col-sm-4">
+                    <select name="weekday" id="weekday" class="form-control">
+            {php $weekmap=[1=>'周一',2=>'周二',3=>'周三',4=>'周四',5=>'周五'];}
+            {loop $weekmap $k $v}
+            <option value="{$k}" {if $item['weekday']==$k}selected{/if}>{$v}</option>
+            {/loop}
+          </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">时段编码</label>
+                <div class="col-sm-4">
+                    <select name="slot_code" id="slot_code" class="form-control">
+            <option value="morning" {if $item['slot_code']=='morning'}selected{/if}>早上</option>
+            <option value="afternoon" {if $item['slot_code']=='afternoon'}selected{/if}>旁晚</option>
+            <option value="evening" {if $item['slot_code']=='evening'}selected{/if}>晚上</option>
+          </select>
+                    <span class="help-block">用于内部识别，可选 morning / afternoon / evening</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">显示名称</label>
+                <div class="col-sm-4">
+                    <input type="text" id="display_name" name="display_name" value="{$item['display_name']}" class="form-control" placeholder="例：周一早上值日">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">最少人数</label>
+                <div class="col-sm-2">
+                    <input type="number" name="required_min" value="{$item['required_min']}" class="form-control" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-2 control-label">最多人数</label>
+                <div class="col-sm-2">
+                    <input type="number" name="required_max" value="{$item['required_max']}" class="form-control" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-4">
+                    <button type="submit" class="btn btn-success">保存</button>
+                    <a href="{php echo $this->createWebUrl('slot', ['op'=>'display']);}" class="btn btn-default">返回</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var weekMap = {
+            '1': '周一',
+            '2': '周二',
+            '3': '周三',
+            '4': '周四',
+            '5': '周五'
+        };
+        var slotMap = {
+            'morning': '早上',
+            'afternoon': '旁晚',
+            'evening': '晚上'
+        };
+
+        var manualEdit = false; // 标志位：用户是否手动输入
+
+        var displayInput = $('#display_name');
+
+        // 当用户手动修改 display_name，标记为 true
+        displayInput.on('input', function() {
+            manualEdit = true;
+        });
+
+        function updateDisplayName() {
+            if (manualEdit) return; // 用户手动修改后不覆盖
+
+            var weekdayVal = $('#weekday').val();
+            var slotVal = $('#slot_code').val();
+            if (weekdayVal && slotVal) {
+                displayInput.val(weekMap[String(weekdayVal)] + slotMap[slotVal]);
+            }
+        }
+
+        // 监听 weekday / slot_code 改变
+        $('#weekday, #slot_code').on('change', updateDisplayName);
+
+        // 页面加载时自动生成一次
+        updateDisplayName();
+    });
+</script>
+
+
+
+{template 'common/footer'}

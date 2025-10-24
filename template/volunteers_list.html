@@ -1,0 +1,114 @@
+{template 'common/header'}
+<div class="main">
+    <form action="" method="get" class="form-horizontal" role="form">
+        <input type="hidden" name="c" value="site" />
+        <input type="hidden" name="a" value="entry" />
+        <input type="hidden" name="m" value="yk_volunteers" />
+        <input type="hidden" name="do" value="volunteers" />
+
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <strong>志愿者家长管理</strong>
+            </div>
+            <div class="panel-body">
+
+                <div class="col-sm-2">
+                    <input type="text" name="keyword" class="form-control" placeholder="姓名 / 手机号 / 时段偏好" value="{$_GPC['keyword']}">
+                </div>
+                <div class="col-sm-10">
+                    <div class="btn-toolbar" role="toolbar">
+                        <button class="btn btn-default"><i class="fa fa-search"></i> 搜索</button>
+                        <a href="{php echo $this->createWebUrl('volunteers', array('op'=>'add'));}" class="btn btn-success">
+                            <i class="fa fa-plus"></i> 添加家长
+                        </a>
+                        <a href="{php echo $this->createWebUrl('volunteers', array('op'=>'export'));}" class="btn btn-primary">
+                            <i class="fa fa-download"></i> 导出Excel
+                        </a>
+                        <a href="javascript:;" class="btn btn-warning" data-toggle="modal" data-target="#importModal">
+                            <i class="fa fa-upload"></i> 导入Excel
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <form action="" method="post" onsubmit="return confirm('确定要删除选中项吗？');">
+        <div class="panel panel-default">
+            <div class="panel-heading">家长列表</div>
+            <div class="table-responsive panel-body">
+                <table class="table table-hover">
+                    <thead class="navbar-inner">
+                        <tr>
+                            <th style="width:5%;">ID</th>
+                            <th>姓名</th>
+                            <th>手机号</th>
+                            <th>孩子班级</th>
+                            <th>志愿时段偏好</th>
+                            <th>最大志愿次数/周</th>
+                            <th>可替补次数/周</th>
+                            <th>最近安排</th>
+                            <th>总安排次数</th>
+                            <th>加入时间</th>
+                            <th style="width:150px; text-align:right;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loop $list $item}
+                        <tr>
+                            <td>{$item['id']}</td>
+                            <td>{$item['name']}</td>
+                            <td>{$item['phone']}</td>
+                            <td>{$item['child_class']}</td>
+                            <td>{$item['prefer_slots']}</td>
+                            <td>{$item['max_per_week']}</td>
+                            <td>{$item['max_substitute_per_week']}</td>
+                            <td>
+                                {if $item['last_assigned'] != '0000-00-00' && $item['last_assigned'] != ''} {$item['last_assigned']} {/if}
+                            </td>
+                            <td>{$item['total_assigned']}</td>
+                            <td>{$item['create_time']}</td>
+                            <td style="text-align:right;">
+                                <a href="{php echo $this->createWebUrl('volunteers', array('op'=>'edit','id'=>$item['id']));}" class="btn btn-default btn-sm"><i class="fa fa-edit"></i> 编辑</a>
+                                <a href="{php echo $this->createWebUrl('volunteers', array('op'=>'delete','id'=>$item['id']));}" class="btn btn-danger btn-sm" onclick="return confirm('确认删除？');"><i class="fa fa-trash"></i> 删除</a>
+                            </td>
+                        </tr>
+                        {/loop}
+                    </tbody>
+                </table>
+                {$pager}
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- 导入Excel弹窗 -->
+<div class="modal fade" id="importModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <form action="{php echo $this->createWebUrl('volunteers', array('op'=>'import'));}" method="post" enctype="multipart/form-data">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    <h4 class="modal-title">批量导入家长信息</h4>
+                </div>
+                <div class="modal-body">
+                    <p>请上传Excel文件，格式要求如下：</p>
+                    <ul>
+                        <li>第一行标题（会自动忽略）</li>
+                        <li>列顺序：姓名、手机号、孩子班级、志愿偏好（JSON或逗号分隔）、每周最多次数、替补次数、是否可替补(1/0)</li>
+                        <li>志愿偏好列可写：Mon_morning,Fri_evening 或 ["Mon_morning","Fri_evening"] 英文逗号间隔</li>
+                    </ul>
+                    <input type="file" name="file" accept=".xlsx,.xls" required class="form-control" />
+                    <p class="help-block">示例：<a href="{php echo $this->createWebUrl('volunteers', array('op'=>'template'));}" target="_blank">下载模板</a></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">上传导入</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{template 'common/footer'}

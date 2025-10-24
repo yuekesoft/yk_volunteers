@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://www.w7.cc" versionCode="">
+	
+	<application setting='false'>
+		<name><![CDATA[志愿者值日排班系统]]></name>
+
+		<identifie><![CDATA[yk_volunteers]]></identifie>
+
+		<version><![CDATA[1.0.0]]></version>
+
+		<ability><![CDATA[xx]]></ability>
+
+		<type><![CDATA[xx]]></type>
+
+		<description><![CDATA[志愿者值日排班系统]]></description>
+
+		<author><![CDATA[Mob446221402609]]></author>
+
+		<url><![CDATA[xx]]></url>
+
+		<setting><![CDATA[xx]]></setting>
+
+	</application>
+
+	
+	<platform>
+		<subscribes>
+			<message type="text" />
+
+			<message type="image" />
+
+			<message type="voice" />
+
+			<message type="video" />
+
+			<message type="shortvideo" />
+
+			<message type="location" />
+
+			<message type="link" />
+
+			<message type="subscribe" />
+
+			<message type="qr" />
+
+			<message type="trace" />
+
+			<message type="click" />
+
+			<message type="merchant_order" />
+
+			<message type="user_get_card" />
+
+			<message type="user_del_card" />
+
+			<message type="user_consume_card" />
+
+		</subscribes>
+
+		<handles>
+
+			<message type="text" />
+			<message type="image" />
+			<message type="voice" />
+			<message type="video" />
+			<message type="shortvideo" />
+			<message type="location" />
+			<message type="link" />
+			<message type="subscribe" />
+			<message type="qr" />
+			<message type="trace" />
+			<message type="click" />
+			<message type="merchant_order" />
+			<message type="user_get_card" />
+			<message type="user_del_card" />
+			<message type="user_consume_card" />
+		</handles>
+
+		<rule embed="false" />
+
+		<rule embed="false" />
+
+	<supports>
+
+			<item type="app" />
+	</supports>
+
+	</platform>
+
+	
+	<bindings>
+
+		<cover>
+			<entry title="应用入口" do="index" state="index" direct="" />
+		</cover>
+
+		<menu>
+			<entry title="志愿者管理" do="volunteers" state="volunteers" direct="" />
+			<entry title="时段配置" do="slot" state="slot" direct="" />
+			<entry title="自动排班" do="assignments" state="assignments" direct="" />
+			<entry title="候补/超额处理" do="waitlist" state="waitlist" direct="" />
+			<entry title="请假与替班管理" do="requests" state="requests" direct="" />
+			<entry title="报表" do="report" state="report" direct="" />
+			<entry title="系统设置" do="sysset" state="sysset" direct="" />			
+		</menu>
+
+	</bindings>
+
+	<install><![CDATA[]]></install>
+	<uninstall><![CDATA[]]></uninstall>
+	<upgrade><![CDATA[]]></upgrade>
+</manifest>

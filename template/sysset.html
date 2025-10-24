@@ -1,0 +1,75 @@
+{template 'common/header'}
+<div class="panel panel-default">
+    <div class="panel-heading"><strong>系统数据管理</strong></div>
+    <div class="panel-body">
+
+        <p>⚠️ 请谨慎操作，部分操作不可恢复！</p>
+
+        <button id="clearVolunteersBtn" class="btn btn-danger" style="margin-right:10px;">
+            <i class="fa fa-trash"></i> 清空家长数据
+        </button>
+
+        <button id="clearAssignmentsBtn" class="btn btn-warning" style="margin-right:10px;">
+            <i class="fa fa-trash-o"></i> 清空自动排班表
+        </button>
+
+        <button id="resetTotalAssignedBtn" class="btn btn-info">
+            <i class="fa fa-refresh"></i> 家长总安排次数归零
+        </button>
+
+    </div>
+</div>
+
+<script>
+    $(function() {
+        // 清空家长数据
+        $('#clearVolunteersBtn').click(function() {
+            if (!confirm('确认要清空所有家长数据吗？此操作不可恢复！')) return;
+
+            $.post("{php echo $this->createWebUrl('sysset', array('op'=>'clear_volunteers'));}", {}, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                    if (data.status == 1) location.reload();
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+
+        // 清空自动排班表
+        $('#clearAssignmentsBtn').click(function() {
+            if (!confirm('确认要清空所有自动排班记录吗？此操作不可恢复！')) return;
+
+            $.post("{php echo $this->createWebUrl('sysset', array('op'=>'clear_assignments'));}", {}, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                    if (data.status == 1) location.reload();
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+
+        // 家长总安排次数归零
+        $('#resetTotalAssignedBtn').click(function() {
+            if (!confirm('确认要将所有家长的总安排次数归零吗？')) return;
+
+            $.post("{php echo $this->createWebUrl('sysset', array('op'=>'reset_total_assigned'));}", {}, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                    if (data.status == 1) location.reload();
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+    });
+</script>
+
+{template 'common/footer'}

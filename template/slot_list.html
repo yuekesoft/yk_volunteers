@@ -1,0 +1,47 @@
+{template 'common/header'}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <span class="text-lg"><i class="fa fa-clock-o"></i> 志愿时段配置</span>
+        <a href="{php echo $this->createWebUrl('slot', ['op'=>'add']);}" class="btn btn-success btn-sm pull-right">
+            <i class="fa fa-plus"></i> 添加时段
+        </a>
+    </div>
+
+    <div class="panel-body table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="bg-light">
+                <tr>
+                    <th style="width:60px;">ID</th>
+                    <th>星期</th>
+                    <th>时段编码</th>
+                    <th>显示名称</th>
+                    <th>最少人数</th>
+                    <th>最多人数</th>
+                    <th>创建时间</th>
+                    <th style="width:120px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {loop $list $item}
+                <tr>
+                    <td>{$item['id']}</td>
+                    <td>
+                        {php $weekmap=[1=>'周一',2=>'周二',3=>'周三',4=>'周四',5=>'周五'];} {$weekmap[$item['weekday']]}
+                    </td>
+                    <td>{$item['slot_code']}</td>
+                    <td>{$item['display_name']}</td>
+                    <td>{$item['required_min']}</td>
+                    <td>{$item['required_max']}</td>
+                    <td>{$item['create_time']}</td>
+                    <td>
+                        <a href="{php echo $this->createWebUrl('slot', ['op'=>'edit','id'=>$item['id']]);}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
+                        <a href="{php echo $this->createWebUrl('slot', ['op'=>'delete','id'=>$item['id']]);}" onclick="return confirm('确定删除该时段？');" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></a>
+                    </td>
+                </tr>
+                {/loop}
+            </tbody>
+        </table>
+        <div class="text-right">{$pager}</div>
+    </div>
+</div>
+{template 'common/footer'}
