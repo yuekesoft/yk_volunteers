@@ -1,6 +1,7 @@
 <?php
 defined('IN_IA') or exit('Access Denied');
 global $_W, $_GPC;
+$uniacid = $_W['uniacid'];
 
 $op = !empty($_GPC['op']) ? $_GPC['op'] : 'display';
 
@@ -12,13 +13,18 @@ $table_slots = 'ims_yk_volunteers_slot_templates';
 // 获取星期中文映射
 $weekMap = [1=>'周一',2=>'周二',3=>'周三',4=>'周四',5=>'周五'];
 
+// 获取系统设置的节假日日期
+$setting_holidays = pdo_get('yk_volunteers_settings', ['uniacid'=>$uniacid, 'key'=>'holidays']);
+$holidays = $setting_holidays ? json_decode($setting_holidays['value'], true) : [];
+
+
 if ($op == 'display') {
     // === 排班列表分页 ===
     $pindex = max(1, intval($_GPC['page']));
     $psize = 196;
 
     $condition = ' WHERE a.uniacid = :uniacid';
-    $params = [':uniacid'=>$_W['uniacid']];
+    $params = [':uniacid'=>$uniacid];
 
     // 可以按日期或志愿者筛选
     if(!empty($_GPC['date'])) {
@@ -144,13 +150,13 @@ elseif($op=='auto_assign'){
     $start_monday = date('Y-m-d', strtotime($start_date.' -'.($weekday-1).' days'));
 
     if($mode=='week'){
-        auto_assign_volunteers($start_monday);
+        auto_assign_volunteers($start_monday,$holidays);
     }elseif($mode=='month'){
         // 循环每周
         $weeks = 4; // 示例排4周
         for($i=0;$i<$weeks;$i++){
             $week_start = date('Y-m-d', strtotime($start_monday.' +'.($i*7).' days'));
-            auto_assign_volunteers($week_start);
+            auto_assign_volunteers($week_start,$holidays);
         }
     }
 
@@ -204,7 +210,7 @@ elseif ($op == 'batch_uncheckin') {
  * 自动生成一周排班
  * @param string $start_date 本周起始日期 YYYY-MM-DD（周一）
  */
-function auto_assign_volunteers($start_date) {
+function auto_assign_volunteers($start_date, $holidays_param) {
     global $_W;
 
     $uniacid = $_W['uniacid'];
@@ -227,7 +233,13 @@ function auto_assign_volunteers($start_date) {
     // 4. 循环每个时段，安排志愿者
     foreach($slots as $slot){
         $date = date('Y-m-d', strtotime($start_date. ' +'.($slot['weekday']-1).' days'));
-        $weekday = intval($slot['weekday']);
+
+        // 如果日期是节假日，跳过
+        if(in_array($date, $holidays_param)){
+            continue; // 跳过当前循环，执行下一个 slot
+        }
+
+        $weekday = intval($slot['weekday']);//星期几
         $slot_code = $slot['slot_code'];
         $max_num = $slot['required_max'];
 

@@ -13,9 +13,37 @@
             <i class="fa fa-trash-o"></i> 清空自动排班表
         </button>
 
-        <button id="resetTotalAssignedBtn" class="btn btn-info">
+        <button id="resetTotalAssignedBtn" class="btn btn-info" style="margin-right:10px;">
             <i class="fa fa-refresh"></i> 家长总安排次数归零
         </button>
+
+        <hr>
+
+        <!-- 节假日设置 -->
+        <h4><i class="fa fa-calendar"></i> 节假日设置</h4>
+        <form id="holidayForm" class="form-inline" style="margin-bottom:15px;">
+            <input type="hidden" name="op" value="save_holidays">
+            <div class="form-group" style="width:70%;">
+                <label>节假日日期（用英文逗号分隔，例如：2025-01-01,2025-02-09）</label>
+                <input type="text" class="form-control" name="holidays" value="{$holidays_str}" style="width:100%;">
+            </div>
+            <button type="submit" class="btn btn-success" style="margin-left:10px;margin-top:20px;">
+                <i class="fa fa-save"></i> 保存
+            </button>
+        </form>
+
+        <!-- 节假日通知设置 -->
+        <h4><i class="fa fa-bell"></i> 节假日通知设置</h4>
+        <form id="holidayNoticeForm" class="form-inline">
+            <input type="hidden" name="op" value="save_holiday_notice">
+            <div class="form-group" style="width:70%;">
+                <label>通知内容</label>
+                <input type="text" class="form-control" name="notice" value="{$holiday_notice}" style="width:100%;">
+            </div>
+            <button type="submit" class="btn btn-success" style="margin-left:10px;margin-top:20px;">
+                <i class="fa fa-save"></i> 保存
+            </button>
+        </form>
 
     </div>
 </div>
@@ -69,6 +97,43 @@
                 }
             });
         });
+
+        // 保存节假日设置
+        $('#holidayForm').submit(function(e) {
+            e.preventDefault();
+            var holidays = $(this).find('input[name=holidays]').val();
+            $.post("{php echo $this->createWebUrl('sysset'); }", {
+                op: 'save_holidays',
+                holidays: holidays
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+
+        // 保存节假日通知
+        $('#holidayNoticeForm').submit(function(e) {
+            e.preventDefault();
+            var notice = $(this).find('input[name=notice]').val();
+            $.post("{php echo $this->createWebUrl('sysset'); }", {
+                op: 'save_holiday_notice',
+                notice: notice
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+
     });
 </script>
 

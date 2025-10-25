@@ -1,89 +1,101 @@
 {template 'common/header'}
-<div class="main">
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3><i class="fa fa-calendar-check-o"></i> 家长值班签到统计报表</h3>
-        </div>
-        <div class="panel-body">
-            <form action="" method="get" class="form-inline">
-                <input type="hidden" name="c" value="site" />
-                <input type="hidden" name="a" value="entry" />
-                <input type="hidden" name="m" value="{$_GPC['m']}" />
-                <input type="hidden" name="do" value="report" />
+<!-- report.html -->
+<div class="panel panel-default">
+    <div class="panel-body">
 
-                <div class="form-group">
-                    <label>开始日期：</label>
-                    <input type="date" name="start_date" value="{$start_date}" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>结束日期：</label>
-                    <input type="date" name="end_date" value="{$end_date}" class="form-control">
-                </div>
-                <button type="submit" class="btn btn-success">
-                    <i class="fa fa-search"></i> 查询
-                </button>
-            </form>
-        </div>
-    </div>
+        <!-- 标签页导航 -->
+        <ul class="nav nav-tabs">
+            <li class="{if $tab == 'tab_detail'}active{/if}">
+                <a href="#tab_detail" data-toggle="tab"><i class="fa fa-list"></i> 签到明细统计</a>
+            </li>
+            <li class="{if $tab == 'tab_summary'}active{/if}">
+                <a href="#tab_summary" data-toggle="tab"><i class="fa fa-users"></i> 家长签到次数统计</a>
+            </li>
+        </ul>
 
-    <div class="panel panel-info">
-        <div class="panel-heading">
-            <i class="fa fa-bar-chart"></i> 总体统计
-        </div>
-        <div class="panel-body text-center" style="font-size:16px;">
-            <span class="label label-primary">总数：{$total}</span>
-            <span class="label label-success">已签到：{$signed}</span>
-            <span class="label label-default">未签到：{$unsigned}</span>
-            <span class="label label-warning">签到率：{$rate}%</span>
-        </div>
-    </div>
+        <div class="tab-content" style="padding-top:15px;">
+            <!-- ✅ 签到明细 tab -->
+            <div class="tab-pane {if $tab == 'tab_detail'}active{/if}" id="tab_detail">
+                <form id="form_detail" method="post" action="{php echo $this->createWebUrl('report');}">
+                    <input type="hidden" name="tab" value="tab_detail">
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-list"></i> 签到明细
+                    <div class="form-inline" style="margin-bottom:15px;">
+                        <label>开始日期：</label>
+                        <input type="date" class="form-control" name="start_date" value="{$start_date}">
+                        <label>结束日期：</label>
+                        <input type="date" class="form-control" name="end_date" value="{$end_date}">
+                        <button type="submit" class="btn btn-primary">查询</button>
+                    </div>
+
+                    <div class="tab-data">
+                        {template 'report_detail_list'}
+                    </div>
+                </form>
+            </div>
+
+            <!-- ✅ 家长统计 tab -->
+            <div class="tab-pane {if $tab == 'tab_summary'}active{/if}" id="tab_summary">
+                <form id="form_summary" method="post" action="{php echo $this->createWebUrl('report');}">
+                    <input type="hidden" name="tab" value="tab_summary">
+
+                    <div class="form-inline" style="margin-bottom:15px;">
+                        <label>开始日期：</label>
+                        <input type="date" class="form-control" name="start_date" value="{$start_date}">
+                        <label>结束日期：</label>
+                        <input type="date" class="form-control" name="end_date" value="{$end_date}">
+                        <button type="submit" class="btn btn-primary">查询</button>
+                    </div>
+
+                    <div class="tab-data">
+                        {template 'report_summary_list'}
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover table-bordered">
-                <thead>
-                    <tr>
-                        <th>日期</th>
-                        <th>时段</th>
-                        <th>家长姓名</th>
-                        <th>孩子班级</th>
-                        <th>安排总次数</th>
-                        <th>签到状态</th>
-                        <th>签到时间</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {if empty($list)}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">暂无数据</td>
-                    </tr>
-                    {else} {loop $list $row}
-                    <tr>
-                        <td>{$row['date']}</td>
-                        <td>
-                            {if $row['slot_code'] == 'morning'} 早上 {elseif $row['slot_code'] == 'afternoon'} 旁晚 {elseif $row['slot_code'] == 'evening'} 晚上 {else} - {/if}
-                        </td>
-                        <td>{$row['volunteer_name']}</td>
-                        <td>{$row['child_class']}</td>
-                        <td>{$row['total_assigned']}</td>
-                        <td>
-                            {if $row['checked_in']==1}
-                            <span class="label label-success">已签到</span> {else}
-                            <span class="label label-default">未签到</span> {/if}
-                        </td>
-                        <td>{if $row['checkin_time']}{$row['checkin_time']}{else}-{/if}</td>
-                    </tr>
-                    {/loop} {/if}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <!-- ✅ 分页导航部分（新增） -->
-    <div class="text-left" style="padding: 5px 20px;">
-        {$pager}
     </div>
 </div>
+
+<!-- ✅ JS：表单 + 分页 都用 AJAX 方式加载 -->
+<script>
+    $(document).ready(function() {
+        // 封装一个函数：用于提交表单并加载 tab 内容
+        function loadTabData($form, url = null) {
+            var $tabData = $form.find('.tab-data');
+            var action = url || $form.attr('action');
+            var formData = $form.serialize();
+
+            $tabData.html('<div class="text-center text-muted p-4">加载中，请稍候...</div>');
+
+            $.post(action, formData, function(res) {
+                $tabData.html(res);
+            }).fail(function() {
+                $tabData.html('<div class="text-danger p-3">加载失败，请稍后重试。</div>');
+            });
+        }
+
+        // ✅ 拦截“查询”按钮提交事件
+        $('.tab-pane form').on('submit', function(e) {
+            e.preventDefault();
+            loadTabData($(this));
+        });
+
+        // ✅ 拦截分页按钮点击事件（包括上一页、下一页）
+        $(document).on('click', '.pagination a', function(e) {
+            e.preventDefault();
+            var url = $(this).attr('href');
+            if (!url || url === '#') return;
+
+            // 找到当前分页所在的 form
+            var $form = $(this).closest('.tab-pane').find('form');
+            loadTabData($form, url);
+        });
+
+        // ✅ 切换 tab 时记住当前 tab 状态（避免刷新后丢失）
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
+            var target = $(e.target).attr('href'); // #tab_detail 或 #tab_summary
+            $('input[name="tab"]').val(target.replace('#', ''));
+        });
+    });
+</script>
+
 {template 'common/footer'}

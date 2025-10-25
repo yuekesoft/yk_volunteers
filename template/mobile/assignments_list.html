@@ -77,6 +77,9 @@
     <div style="text-align:center;color:#888;font-size:13px; margin-top:5px;">
         {php echo date('m月d日', strtotime($start_date));} ~ {php echo date('m月d日', strtotime($end_date));}
     </div>
+    <div style="text-align:center;color:#3a0202; font-size:14px;">
+        {$holiday_notice}
+    </div>
     <div id="noDataMsg" style="display:none;color:#999;font-size:13px;margin-top:5px;">本周还未排班</div>
 </div>
 
@@ -167,7 +170,7 @@
                             </span>
                             <strong>
                                 {if $s['slot_code']=='morning'}早上
-                                {elseif $s['slot_code']=='afternoon'}旁晚
+                                {elseif $s['slot_code']=='afternoon'}傍晚
                                 {elseif $s['slot_code']=='evening'}晚上
                                 {else}{$s['slot_code']}{/if}
                             </strong> ：{$s['volunteer_name']}（{$s['volunteer_child_class']}）

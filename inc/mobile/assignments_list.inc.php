@@ -11,6 +11,10 @@
     $start_date = $_GPC['start_date'] ?? date('Y-m-d', strtotime('monday this week'));
     $end_date   = $_GPC['end_date'] ?? date('Y-m-d', strtotime($start_date . ' +6 days'));
 
+    // 通知
+    $setting_notice = pdo_get('yk_volunteers_settings', ['uniacid'=>$uniacid, 'key'=>'holiday_notice']);
+    $holiday_notice = $setting_notice ? $setting_notice['value'] : '';
+
     // 查询 ims_yk_volunteers_assignments 表数据
     $list = pdo_fetchall("
         SELECT a.*, v.name AS volunteer_name, v.child_class AS volunteer_child_class
