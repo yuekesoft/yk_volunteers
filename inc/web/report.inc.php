@@ -12,9 +12,101 @@ $tab = $_GPC['tab'] ?: 'tab_detail';
 $start_date = $_GPC['start_date'] ?: date('Y-m-01');
 $end_date   = $_GPC['end_date'] ?: date('Y-m-d');
 
+// ========== 导出 Excel 处理 ==========
+if ($_GPC['op'] == 'export') {
+    require_once IA_ROOT . '/framework/library/phpexcel/PHPExcel.php';
+
+    if ($tab == 'tab_detail') {
+        // 导出签到明细
+        $sql = "SELECT s.*, v.name AS volunteer_name, v.child_class, v.prefer_slots
+                FROM " . tablename('yk_volunteers_assignments') . " s
+                LEFT JOIN " . tablename('yk_volunteers_volunteers') . " v ON v.id = s.volunteer_id
+                WHERE s.uniacid = :uniacid
+                  AND s.date BETWEEN :start AND :end
+                ORDER BY s.date ASC";
+        $params = [':uniacid' => $weid, ':start' => $start_date, ':end' => $end_date];
+        $list = pdo_fetchall($sql, $params);
+
+        // 设置表头
+        $objPHPExcel = new PHPExcel();
+        $sheet = $objPHPExcel->setActiveSheetIndex(0);
+        $sheet->setCellValue('A1', '日期')
+              ->setCellValue('B1', '家长姓名')
+              ->setCellValue('C1', '孩子班级')
+              ->setCellValue('D1', '时段')
+              ->setCellValue('E1', '签到状态')
+              ->setCellValue('F1', '签到时间');
+
+        $row = 2;
+        foreach ($list as $v) {
+            $status = $v['checked_in'] == 1 ? '已签到' : '未签到';
+            $sign_time = $v['checkin_time'] ? date('Y-m-d H:i', $v['checkin_time']) : '';
+            $sheet->setCellValue('A'.$row, $v['date'])
+                  ->setCellValue('B'.$row, $v['volunteer_name'])
+                  ->setCellValue('C'.$row, $v['child_class'])
+                  ->setCellValue('D'.$row, $v['slot_code'])
+                  ->setCellValue('E'.$row, $status)
+                  ->setCellValue('F'.$row, $sign_time);
+            $row++;
+        }
+
+        $filename = "签到明细_{$start_date}_{$end_date}.xlsx";
+    } else {
+        // 导出家长签到次数汇总
+        $sql = "SELECT v.name AS volunteer_name, v.child_class, v.prefer_slots,
+                       SUM(CASE WHEN s.checked_in = 1 THEN 1 ELSE 0 END) AS sign_count,
+                       COUNT(s.id) AS total_assigned
+                FROM " . tablename('yk_volunteers_volunteers') . " v
+                LEFT JOIN " . tablename('yk_volunteers_assignments') . " s ON v.id = s.volunteer_id
+                WHERE s.uniacid = :uniacid
+                  AND s.date BETWEEN :start AND :end
+                GROUP BY v.id
+                ORDER BY sign_count DESC, total_assigned DESC";
+        $params = [':uniacid' => $weid, ':start' => $start_date, ':end' => $end_date];
+        $list = pdo_fetchall($sql, $params);
+
+        // 偏好时段映射
+        $slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $_W['uniacid'], 'key' => 'slot_labels']);
+        $slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [];
+
+        // 创建表
+        $objPHPExcel = new PHPExcel();
+        $sheet = $objPHPExcel->setActiveSheetIndex(0);
+        $sheet->setCellValue('A1', '家长姓名')
+              ->setCellValue('B1', '孩子班级')
+              ->setCellValue('C1', '偏好时段')
+              ->setCellValue('D1', '签到次数')
+              ->setCellValue('E1', '总安排次数');
+
+        $row = 2;
+        foreach ($list as $v) {
+            $slot_label = $slot_labels[$v['prefer_slots']] ?? $v['prefer_slots'];
+            $sheet->setCellValue('A'.$row, $v['volunteer_name'])
+                  ->setCellValue('B'.$row, $v['child_class'])
+                  ->setCellValue('C'.$row, $slot_label)
+                  ->setCellValue('D'.$row, $v['sign_count'])
+                  ->setCellValue('E'.$row, $v['total_assigned']);
+            $row++;
+        }
+
+        $filename = "家长签到汇总_{$start_date}_{$end_date}.xlsx";
+    }
+
+    // 输出 Excel
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header("Content-Disposition: attachment;filename=\"{$filename}\"");
+    header('Cache-Control: max-age=0');
+    $writer = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+    $writer->save('php://output');
+    exit;
+}
+
 // 通用分页参数
 $pindex = max(1, intval($_GPC['page']));
 $psize  = 50;
+
+$slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $_W['uniacid'], 'key' => 'slot_labels']);
+$slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [];
 
 // ========== TAB 1：签到明细统计 ==========
 if ($tab == 'tab_detail') {

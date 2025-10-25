@@ -10,6 +10,9 @@ $op = !empty($_GPC['op']) ? $_GPC['op'] : 'display';
 $table = 'ims_yk_volunteers_volunteers';
 
 if ($op == 'display') {
+    $slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $uniacid, 'key' => 'slot_labels']);
+    $slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [];
+    
     // 搜索 + 分页
     $pindex = max(1, intval($_GPC['page']));
     $psize = 20;

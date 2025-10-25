@@ -42,7 +42,7 @@
                 <div class="col-sm-4">
                     <select name="volunteer_id" class="form-control" required>
                         {loop $volunteers $v}
-                        <option value="{$v['id']}" {if $item['volunteer_id']==$v['id']}selected{/if}>{$v['name']} ({$v['child_class']})</option>
+                        <option value="{$v['id']}" {if $item['volunteer_id']==$v['id']}selected{/if}>{$v['name']} ({$v['child_class']})-{$v['prefer_slots']}</option>
                         {/loop}
                     </select>
                 </div>

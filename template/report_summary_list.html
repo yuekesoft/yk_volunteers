@@ -7,6 +7,7 @@
                     <th>家长姓名</th>
                     <th>孩子班级</th>
                     <th>志愿时段偏好</th>
+                    <th>志愿时段偏好</th>
                     <th style="width:120px;">签到总次数</th>
                     <th style="width:120px;">安排总次数</th>
                 </tr>
@@ -22,6 +23,9 @@
                     <td>{$item['volunteer_name']}</td>
                     <td>{$item['child_class']}</td>
                     <td>{$item['prefer_slots']}</td>
+                    <td>
+                        {php echo $slot_labels[$item['prefer_slots']] ?? $item['prefer_slots'];}
+                    </td>
                     <td><span class="label label-info">{$item['sign_count']}</span></td>
                     <td><span class="label label-default">{$item['total_assigned']}</span></td>
                 </tr>

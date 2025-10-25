@@ -36,6 +36,16 @@
     $notice_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'holiday_notice']);
     $holiday_notice = $notice_setting ? $notice_setting['value'] : '';
 
+    // 读取时段名称设置
+    $slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $weid, 'key' => 'slot_labels']);
+    $slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [
+        'Mon_morning' => '周一早上', 'Mon_afternoon' => '周一傍晚', 'Mon_evening' => '周一晚上',
+        'Tue_morning' => '周二早上', 'Tue_afternoon' => '周二傍晚', 'Tue_evening' => '周二晚上',
+        'Wed_morning' => '周三早上', 'Wed_afternoon' => '周三傍晚', 'Wed_evening' => '周三晚上',
+        'Thu_morning' => '周四早上', 'Thu_afternoon' => '周四傍晚', 'Thu_evening' => '周四晚上',
+        'Fri_morning' => '周五早上', 'Fri_afternoon' => '周五傍晚'
+    ];
+
     // ---------- 处理 AJAX 保存请求 ----------
     if($op == 'save_holidays'){
         $holidays = trim($_GPC['holidays']);
@@ -59,6 +69,17 @@
         }
 
         exit(json_encode(['status'=>1,'msg'=>'节假日通知已保存！']));
+    }
+
+    // 保存时段名称设置
+    if ($op == 'save_slots') {
+        $slot_labels = $_GPC['slot_labels'];
+        pdo_insert('yk_volunteers_settings', [
+            'uniacid' => $weid,
+            'key' => 'slot_labels',
+            'value' => json_encode($slot_labels, JSON_UNESCAPED_UNICODE),
+        ], true);
+        exit(json_encode(['status'=>1, 'msg'=>'时段名称设置已保存']));
     }
 
     // 默认显示页面（可选择返回模板）

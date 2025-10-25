@@ -25,6 +25,11 @@
                         <label>结束日期：</label>
                         <input type="date" class="form-control" name="end_date" value="{$end_date}">
                         <button type="submit" class="btn btn-primary">查询</button>
+
+                        <!-- ✅ 改为 data-base-url 自动更新的导出按钮 -->
+                        <a id="export_detail" class="btn btn-success" data-base-url="<?php echo $this->createWebUrl('report',['op'=>'export','tab'=>'tab_detail']); ?>">
+                            <i class="fa fa-file-excel-o"></i> 导出签到明细
+                        </a>
                     </div>
 
                     <div class="tab-data">
@@ -44,6 +49,11 @@
                         <label>结束日期：</label>
                         <input type="date" class="form-control" name="end_date" value="{$end_date}">
                         <button type="submit" class="btn btn-primary">查询</button>
+
+                        <!-- ✅ 改为 data-base-url 自动更新的导出按钮 -->
+                        <a id="export_summary" class="btn btn-success" data-base-url="<?php echo $this->createWebUrl('report',['op'=>'export','tab'=>'tab_summary']); ?>">
+                            <i class="fa fa-download"></i> 导出签到汇总
+                        </a>
                     </div>
 
                     <div class="tab-data">
@@ -55,15 +65,15 @@
     </div>
 </div>
 
-<!-- ✅ JS：表单 + 分页 都用 AJAX 方式加载 -->
+<!-- ✅ JS：表单 + 分页 + 导出链接日期同步 -->
 <script>
     $(document).ready(function() {
-        // 封装一个函数：用于提交表单并加载 tab 内容
+
+        // ==========【封装函数：加载tab数据】==========
         function loadTabData($form, url = null) {
             var $tabData = $form.find('.tab-data');
             var action = url || $form.attr('action');
             var formData = $form.serialize();
-
             $tabData.html('<div class="text-center text-muted p-4">加载中，请稍候...</div>');
 
             $.post(action, formData, function(res) {
@@ -73,28 +83,70 @@
             });
         }
 
-        // ✅ 拦截“查询”按钮提交事件
+        // ==========【表单提交 AJAX 加载】==========
         $('.tab-pane form').on('submit', function(e) {
             e.preventDefault();
             loadTabData($(this));
+            updateExportLinks(); // 查询后也更新导出链接
         });
 
-        // ✅ 拦截分页按钮点击事件（包括上一页、下一页）
+        // ==========【分页 AJAX 加载】==========
         $(document).on('click', '.pagination a', function(e) {
             e.preventDefault();
             var url = $(this).attr('href');
             if (!url || url === '#') return;
-
-            // 找到当前分页所在的 form
             var $form = $(this).closest('.tab-pane').find('form');
             loadTabData($form, url);
         });
 
-        // ✅ 切换 tab 时记住当前 tab 状态（避免刷新后丢失）
+        // ==========【Tab 切换时保存状态】==========
         $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-            var target = $(e.target).attr('href'); // #tab_detail 或 #tab_summary
+            var target = $(e.target).attr('href');
             $('input[name="tab"]').val(target.replace('#', ''));
+            updateExportLinks(); // 切换tab时同步导出链接
         });
+
+        // ==========【导出链接自动更新部分】==========
+        function updateExportLinks() {
+            // 明细
+            var $form1 = $('#form_detail');
+            var $link1 = $('#export_detail');
+            if ($form1.length && $link1.length) {
+                var start1 = $form1.find('input[name="start_date"]').val();
+                var end1 = $form1.find('input[name="end_date"]').val();
+                updateHref($link1, start1, end1);
+            }
+
+            // 汇总
+            var $form2 = $('#form_summary');
+            var $link2 = $('#export_summary');
+            if ($form2.length && $link2.length) {
+                var start2 = $form2.find('input[name="start_date"]').val();
+                var end2 = $form2.find('input[name="end_date"]').val();
+                updateHref($link2, start2, end2);
+            }
+        }
+
+        // ==========【更新某个链接的href】==========
+        function updateHref($link, start, end) {
+            var base = $link.data('base-url');
+            if (!base) return;
+            base = base.replace(/(&|\?)start_date=[^&]*/g, '').replace(/(&|\?)end_date=[^&]*/g, '');
+            var sep = base.indexOf('?') === -1 ? '?' : '&';
+            var params = [];
+            if (start) params.push('start_date=' + encodeURIComponent(start));
+            if (end) params.push('end_date=' + encodeURIComponent(end));
+            var href = base + (params.length ? sep + params.join('&') : '');
+            $link.attr('href', href);
+        }
+
+        // ==========【日期输入变化自动更新链接】==========
+        $(document).on('change', 'input[name="start_date"], input[name="end_date"]', function() {
+            updateExportLinks();
+        });
+
+        // 初始化执行一次
+        updateExportLinks();
     });
 </script>
 

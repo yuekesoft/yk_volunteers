@@ -87,7 +87,7 @@ elseif ($op == 'add' || $op == 'edit') {
     }
 
     // 获取志愿者列表
-    $volunteers = pdo_fetchall("SELECT * FROM {$table_volunteers} WHERE uniacid=:uniacid ORDER BY name ASC", [':uniacid'=>$_W['uniacid']]);
+    $volunteers = pdo_fetchall("SELECT * FROM {$table_volunteers} WHERE uniacid=:uniacid ORDER BY prefer_slots ASC", [':uniacid'=>$_W['uniacid']]);
 
     // 获取时段模板
     $slots = pdo_fetchall("SELECT * FROM {$table_slots} WHERE uniacid=:uniacid ORDER BY weekday ASC, slot_code ASC", [':uniacid'=>$_W['uniacid']]);
