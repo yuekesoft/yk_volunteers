@@ -44,6 +44,7 @@ if ($op == 'display') {
             'name' => trim($_GPC['name']),
             'phone' => trim($_GPC['phone']),
             'child_class' => trim($_GPC['child_class']),
+            'openid' => trim($_GPC['openid']),
             'prefer_slots' => trim($_GPC['prefer_slots']),
             'can_substitute' => intval($_GPC['can_substitute']),
             'max_per_week' => intval($_GPC['max_per_week']),

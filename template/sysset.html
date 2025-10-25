@@ -72,6 +72,42 @@
     </div>
 </div>
 
+<div class="panel panel-default">
+    <div class="panel-heading"><strong>家长扫码签到有效时间段设置</strong></div>
+    <div class="panel-body">
+        <form id="slotTimesForm" class="form-horizontal">
+            <?php
+            $slot_times_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$uniacid, 'key'=>'slot_times']);
+            $slot_times = $slot_times_setting ? json_decode($slot_times_setting['value'], true) : [
+                'morning'   => ['start'=>'06:30','end'=>'07:30'],
+                'afternoon' => ['start'=>'16:00','end'=>'17:30'],
+                'evening'   => ['start'=>'19:40','end'=>'20:30'],
+            ];
+            ?>
+                <div class="form-inline" style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                    <div>
+                        <label>早上 (Morning)</label>
+                        <input type="time" name="slot_times[morning][start]" value="<?php echo $slot_times['morning']['start'];?>" class="form-control"> ~
+                        <input type="time" name="slot_times[morning][end]" value="<?php echo $slot_times['morning']['end'];?>" class="form-control">
+                    </div>
+                    <div>
+                        <label>傍晚 (Afternoon)</label>
+                        <input type="time" name="slot_times[afternoon][start]" value="<?php echo $slot_times['afternoon']['start'];?>" class="form-control"> ~
+                        <input type="time" name="slot_times[afternoon][end]" value="<?php echo $slot_times['afternoon']['end'];?>" class="form-control">
+                    </div>
+                    <div>
+                        <label>晚上 (Evening)</label>
+                        <input type="time" name="slot_times[evening][start]" value="<?php echo $slot_times['evening']['start'];?>" class="form-control"> ~
+                        <input type="time" name="slot_times[evening][end]" value="<?php echo $slot_times['evening']['end'];?>" class="form-control">
+                    </div>
+                    <div>
+                        <button type="button" id="saveSlotTimesBtn" class="btn btn-primary">保存设置</button>
+                    </div>
+                </div>
+        </form>
+    </div>
+</div>
+
 <script>
     $(function() {
         // 清空家长数据
@@ -165,6 +201,29 @@
             });
         });
 
+    });
+</script>
+
+<!-- 保存扫码时段 -->
+<script>
+    $(document).ready(function() {
+        $('#saveSlotTimesBtn').click(function() {
+            var formData = $('#slotTimesForm').serialize();
+
+            $.post("<?php echo $this->createWebUrl('sysset', ['op'=>'save_slot_times']); ?>", formData, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    if (data.status == 1) {
+                        alert('保存成功');
+                    } else {
+                        alert('保存失败：' + data.msg);
+                    }
+                } catch (e) {
+                    console.error(res);
+                    alert('保存失败，请重试');
+                }
+            });
+        });
     });
 </script>
 

@@ -82,5 +82,24 @@
         exit(json_encode(['status'=>1, 'msg'=>'时段名称设置已保存']));
     }
 
+    if($_GPC['op'] == 'save_slot_times' && $_W['ispost']){
+        $slot_times = $_GPC['slot_times'] ?? [];
+        if(!empty($slot_times)){
+            $exist = pdo_get('yk_volunteers_settings', ['uniacid'=>$_W['uniacid'], 'key'=>'slot_times']);
+            $data = [
+                'uniacid' => $_W['uniacid'],
+                'key' => 'slot_times',
+                'value' => json_encode($slot_times, JSON_UNESCAPED_UNICODE),
+            ];
+            if($exist){
+                pdo_update('yk_volunteers_settings', ['value'=>$data['value']], ['id'=>$exist['id']]);
+            } else {
+                pdo_insert('yk_volunteers_settings', $data);
+            }
+            exit(json_encode(['status'=>1,'msg'=>'保存成功']));
+        }
+        exit(json_encode(['status'=>0,'msg'=>'参数为空']));
+    }
+
     // 默认显示页面（可选择返回模板）
     include $this->template('sysset');

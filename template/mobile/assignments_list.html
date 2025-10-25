@@ -81,6 +81,14 @@
         {$holiday_notice}
     </div>
     <div id="noDataMsg" style="display:none;color:#999;font-size:13px;margin-top:5px;">本周还未排班</div>
+    <!-- ✅ 新增按钮：仅在未绑定微信时显示 -->
+    {if empty($volunteer)}
+    <div style="margin-top:10px;">
+        <a href="{php echo $this->createMobileUrl('bind_wechat');}" class="btn btn-success btn-block" style="width:180px;font-size:15px;">
+            <i class="fa fa-link"></i> 绑定我的微信
+        </a>
+    </div>
+    {/if}
 </div>
 
 

@@ -45,7 +45,7 @@
                             <th>姓名</th>
                             <th>手机号</th>
                             <th>孩子班级</th>
-                            <th>志愿时段偏好</th>
+                            <th>微信openid</th>
                             <th>志愿时段偏好</th>
                             <th>最大志愿次数/周</th>
                             <th>可替补次数/周</th>
@@ -62,7 +62,7 @@
                             <td>{$item['name']}</td>
                             <td>{$item['phone']}</td>
                             <td>{$item['child_class']}</td>
-                            <td>{$item['prefer_slots']}</td>
+                            <td>{$item['openid']}</td>
                             <td>{php echo $slot_labels[$item['prefer_slots']] ?? $item['prefer_slots'];}</td>
                             <td>{$item['max_per_week']}</td>
                             <td>{$item['max_substitute_per_week']}</td>

@@ -1,0 +1,46 @@
+{template 'common/header'}
+<div class="container" style="padding:20px;">
+    <h3 style="text-align:center;color:#333;">绑定我的微信</h3>
+    <p style="text-align:center;color:#888;font-size:13px;">请填写孩子信息进行绑定</p>
+
+    <form id="bindForm" method="post" action="<?php echo $this->createMobileUrl('bind_wechat');?>" style="margin-top:25px;">
+        <div class="form-group">
+            <label>孩子姓名</label>
+            <input type="text" name="child_name" class="form-control" placeholder="请输入孩子姓名" required>
+        </div>
+
+        <div class="form-group">
+            <label>孩子班级</label>
+            <input type="text" name="child_class" class="form-control" placeholder="请输入孩子班级" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:15px;height:40px;">确认绑定</button>
+    </form>
+
+    <div id="bindMsg" style="margin-top:20px;text-align:center;font-size:14px;color:#555;"></div>
+</div>
+
+<script>
+    $(function() {
+        $('#bindForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+
+            $('#bindMsg').html('<span style="color:#999;">提交中，请稍候...</span>');
+
+            $.post($(this).attr('action'), formData, function(res) {
+                if (res.status == 1) {
+                    $('#bindMsg').html('<span style="color:green;">✅ 绑定成功！</span>');
+                    setTimeout(() => {
+                        history.back();
+                    }, 1500);
+                } else {
+                    $('#bindMsg').html('<span style="color:red;">❌ ' + res.msg + '</span>');
+                }
+            }, 'json').fail(function() {
+                $('#bindMsg').html('<span style="color:red;">网络错误，请稍后重试。</span>');
+            });
+        });
+    });
+</script>
+{template 'common/footer'}
