@@ -15,12 +15,15 @@ $holiday_notice = $setting_notice ? $setting_notice['value'] : '';
 $volunteer = pdo_get('yk_volunteers_volunteers', ['uniacid'=>$uniacid, 'openid'=>$openid]);
 
 if (!empty($volunteer)){
-    $condition = ' and v.openid= :openid ';
+    $condition = ' AND v.openid= :openid AND a.date >= :start_date ';
     $params = [':openid'=>$openid];
+    $params['start_date'] = $start_date;
+} else {
+    $condition =' AND a.date BETWEEN :start_date AND :end_date ';    
+    $params['start_date'] = $start_date;
+    $params['end_date'] = $end_date;
 }
 $params['uniacid'] = $uniacid;
-$params['start_date'] = $start_date;
-$params['end_date'] = $end_date;
 
 // 查询排班数据
 $list = pdo_fetchall("
@@ -28,7 +31,7 @@ $list = pdo_fetchall("
     FROM " . tablename('yk_volunteers_assignments') . " AS a
     LEFT JOIN " . tablename('yk_volunteers_volunteers') . " AS v ON v.id = a.volunteer_id
     WHERE a.uniacid = :uniacid ".$condition."
-      AND a.date BETWEEN :start_date AND :end_date
+      
     ORDER BY a.date ASC, FIELD(a.slot_code, 'morning','afternoon','evening')
 ", $params);
 

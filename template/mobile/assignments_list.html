@@ -63,32 +63,34 @@
 </style>
 
 <div class="week-nav" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 15px 0;">
+    {if empty($volunteer)}
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
         <button class="btn btn-default btn-lg" id="prevWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
-            <i class="fa fa-arrow-left"></i> 上一周
-        </button>
+                <i class="fa fa-arrow-left"></i> 上一周
+            </button>
         <button class="btn btn-primary btn-lg" id="currentWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
-            <i class="fa fa-calendar"></i> 本周
-        </button>
+                <i class="fa fa-calendar"></i> 本周
+            </button>
         <button class="btn btn-default btn-lg" id="nextWeekBtn" style="min-width:90px; font-size:16px; padding:10px 15px;">
-            下一周 <i class="fa fa-arrow-right"></i>
-        </button>
+                下一周 <i class="fa fa-arrow-right"></i>
+            </button>
     </div>
     <div style="text-align:center;color:#888;font-size:13px; margin-top:5px;">
         {php echo date('m月d日', strtotime($start_date));} ~ {php echo date('m月d日', strtotime($end_date));}
     </div>
-    <div style="text-align:center;color:#3a0202; font-size:14px;">
-        {$holiday_notice}
-    </div>
+
     <div id="noDataMsg" style="display:none;color:#999;font-size:13px;margin-top:5px;">本周还未排班</div>
     <!-- ✅ 新增按钮：仅在未绑定微信时显示 -->
-    {if empty($volunteer)}
+
     <div style="margin-top:10px;">
         <a href="{php echo $this->createMobileUrl('bind_wechat');}" class="btn btn-success btn-block" style="width:180px;font-size:15px;">
             <i class="fa fa-link"></i> 绑定我的微信
         </a>
     </div>
     {/if}
+    <div style="text-align:center;color:#3a0202; font-size:14px;">
+        {$holiday_notice}
+    </div>
 </div>
 
 
