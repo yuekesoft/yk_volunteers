@@ -37,10 +37,21 @@
         <form id="holidayNoticeForm" class="form-inline">
             <input type="hidden" name="op" value="save_holiday_notice">
             <div class="form-group" style="width:70%;">
-                <label>通知内容</label> {php echo tpl_ueditor('notice',$holiday_notice);}
-                <!-- <input type="text" class="form-control" name="notice" value="{$holiday_notice}" style="width:100%;"> -->
+                {php echo tpl_ueditor('notice',$holiday_notice);}
             </div>
             <button type="submit" class="btn btn-success" style="margin-left:10px;margin-top:20px;">
+                <i class="fa fa-save"></i> 保存
+            </button>
+        </form>
+
+        <!-- ✅ 自动排班分页数量 -->
+        <h4><i class="fa fa-calendar"></i> 自动排班页面每页显示数量设置</h4>
+        <form id="auto_assign_page_sizeForm" class="form-inline" style="margin-bottom:15px;">
+            <input type="hidden" name="op" value="save_auto_assign_page_size">
+            <div class="form-group" style="width:70%;">
+                <input type="number" name="auto_assign_page_size" value="{$auto_assign_page_size}" class="form-control" min="20" style="width:100%;">
+            </div>
+            <button type="submit" class="btn btn-success" style="margin-left:10px;">
                 <i class="fa fa-save"></i> 保存
             </button>
         </form>
@@ -76,34 +87,26 @@
     <div class="panel-heading"><strong>家长扫码签到有效时间段设置</strong></div>
     <div class="panel-body">
         <form id="slotTimesForm" class="form-horizontal">
-            <?php
-            $slot_times_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$uniacid, 'key'=>'slot_times']);
-            $slot_times = $slot_times_setting ? json_decode($slot_times_setting['value'], true) : [
-                'morning'   => ['start'=>'06:30','end'=>'07:30'],
-                'afternoon' => ['start'=>'16:00','end'=>'17:30'],
-                'evening'   => ['start'=>'19:40','end'=>'20:30'],
-            ];
-            ?>
-                <div class="form-inline" style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
-                    <div>
-                        <label>早上 (Morning)</label>
-                        <input type="time" name="slot_times[morning][start]" value="<?php echo $slot_times['morning']['start'];?>" class="form-control"> ~
-                        <input type="time" name="slot_times[morning][end]" value="<?php echo $slot_times['morning']['end'];?>" class="form-control">
-                    </div>
-                    <div>
-                        <label>傍晚 (Afternoon)</label>
-                        <input type="time" name="slot_times[afternoon][start]" value="<?php echo $slot_times['afternoon']['start'];?>" class="form-control"> ~
-                        <input type="time" name="slot_times[afternoon][end]" value="<?php echo $slot_times['afternoon']['end'];?>" class="form-control">
-                    </div>
-                    <div>
-                        <label>晚上 (Evening)</label>
-                        <input type="time" name="slot_times[evening][start]" value="<?php echo $slot_times['evening']['start'];?>" class="form-control"> ~
-                        <input type="time" name="slot_times[evening][end]" value="<?php echo $slot_times['evening']['end'];?>" class="form-control">
-                    </div>
-                    <div>
-                        <button type="button" id="saveSlotTimesBtn" class="btn btn-primary">保存设置</button>
-                    </div>
+            <div class="form-inline" style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                <div>
+                    <label>早上 (Morning)</label>
+                    <input type="time" name="slot_times[morning][start]" value="<?php echo $slot_times['morning']['start'];?>" class="form-control"> ~
+                    <input type="time" name="slot_times[morning][end]" value="<?php echo $slot_times['morning']['end'];?>" class="form-control">
                 </div>
+                <div>
+                    <label>傍晚 (Afternoon)</label>
+                    <input type="time" name="slot_times[afternoon][start]" value="<?php echo $slot_times['afternoon']['start'];?>" class="form-control"> ~
+                    <input type="time" name="slot_times[afternoon][end]" value="<?php echo $slot_times['afternoon']['end'];?>" class="form-control">
+                </div>
+                <div>
+                    <label>晚上 (Evening)</label>
+                    <input type="time" name="slot_times[evening][start]" value="<?php echo $slot_times['evening']['start'];?>" class="form-control"> ~
+                    <input type="time" name="slot_times[evening][end]" value="<?php echo $slot_times['evening']['end'];?>" class="form-control">
+                </div>
+                <div>
+                    <button type="button" id="saveSlotTimesBtn" class="btn btn-primary">保存设置</button>
+                </div>
+            </div>
         </form>
     </div>
 </div>
@@ -192,6 +195,24 @@
             $.post("{php echo $this->createWebUrl('sysset'); }", {
                 op: 'save_holiday_notice',
                 notice: content
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
+            });
+        });
+
+        // 保存自动排班分页显示数量
+        $('#auto_assign_page_sizeForm').submit(function(e) {
+            e.preventDefault();
+            var auto_assign_page_size = $(this).find('input[name=auto_assign_page_size]').val();
+            $.post("{php echo $this->createWebUrl('sysset'); }", {
+                op: 'save_auto_assign_page_size',
+                pagesize: auto_assign_page_size
             }, function(res) {
                 try {
                     var data = JSON.parse(res);

@@ -21,7 +21,13 @@ $holidays = $setting_holidays ? json_decode($setting_holidays['value'], true) : 
 if ($op == 'display') {
     // === 排班列表分页 ===
     $pindex = max(1, intval($_GPC['page']));
-    $psize = 196;
+
+    // 获取自动排班分页显示数量
+    $auto_assign_page_size = pdo_fetchcolumn("SELECT `value` FROM " . tablename('yk_volunteers_settings') . 
+        " WHERE uniacid=:uniacid AND `key`=:page_size ", [':uniacid' => $uniacid, ':page_size' => 'auto_assign_page_size']);
+    if (empty($auto_assign_page_size)) $auto_assign_page_size = 196;
+
+    $psize = intval($auto_assign_page_size);
 
     $condition = ' WHERE a.uniacid = :uniacid';
     $params = [':uniacid'=>$uniacid];
@@ -253,6 +259,20 @@ function auto_assign_volunteers($start_date, $holidays_param) {
         $weekday = intval($slot['weekday']);//星期几
         $slot_code = $slot['slot_code'];
         $max_num = $slot['required_max'];
+
+        // 检查该日期是否已有排班记录
+        $exists = pdo_fetchcolumn(
+            "SELECT COUNT(*) FROM " . tablename('yk_volunteers_assignments') . " 
+             WHERE date = :date AND slot_code = :slot_code AND uniacid = :uniacid",
+            [':date' => $date, ':slot_code' => $slot_code ,':uniacid' => $uniacid]
+        );
+
+        // 如果已存在排班，跳过该日期
+        if ($exists > 0) {
+            // 这里你可以选择写日志或提示
+            // echo "📅 {$date} 已排班，跳过<br>";
+            continue;
+        }        
 
         // 找出偏好该时段的志愿者
         $candidates = [];

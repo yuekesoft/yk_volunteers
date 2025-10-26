@@ -36,6 +36,10 @@
     $notice_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'holiday_notice']);
     $holiday_notice = $notice_setting ? $notice_setting['value'] : '';
 
+     // ---------- 获取自动排班分页数量设置 ----------
+     $auto_assign_page_size_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'auto_assign_page_size']); 
+     $auto_assign_page_size = $auto_assign_page_size_setting ? $auto_assign_page_size_setting['value'] : 20;  
+
     // 读取时段名称设置
     $slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $weid, 'key' => 'slot_labels']);
     $slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [
@@ -45,6 +49,10 @@
         'Thu_morning' => '周四早上', 'Thu_afternoon' => '周四傍晚', 'Thu_evening' => '周四晚上',
         'Fri_morning' => '周五早上', 'Fri_afternoon' => '周五傍晚'
     ];
+
+    // ---------- 家长扫码签到有效时间段设置 ----------
+    $slot_times_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'slot_times']);
+    $slot_times = $slot_times_setting ? json_decode($slot_times_setting['value'], true) : [];
 
     // ---------- 处理 AJAX 保存请求 ----------
     if($op == 'save_holidays'){
@@ -71,34 +79,49 @@
         exit(json_encode(['status'=>1,'msg'=>'节假日通知已保存！']));
     }
 
+    if($op == 'save_auto_assign_page_size'){
+        $pagesize = trim($_GPC['pagesize']);
+
+        if($auto_assign_page_size_setting){
+            pdo_update('yk_volunteers_settings', ['value'=>$pagesize,'create_time'=>time()], ['id'=>$auto_assign_page_size_setting['id']]);
+        } else {
+            pdo_insert('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'auto_assign_page_size','value'=>$pagesize,'create_time'=>time()]);
+        }
+
+        exit(json_encode(['status'=>1,'msg'=>'自动排班分页显示数量设置已保存！']));
+    }
+
     // 保存时段名称设置
     if ($op == 'save_slots') {
         $slot_labels = $_GPC['slot_labels'];
-        pdo_insert('yk_volunteers_settings', [
+        $data = [
             'uniacid' => $weid,
             'key' => 'slot_labels',
             'value' => json_encode($slot_labels, JSON_UNESCAPED_UNICODE),
-        ], true);
+            'create_time'=>time()
+        ];
+        if(!empty($slot_setting)){
+                pdo_update('yk_volunteers_settings', ['value'=>$data['value'],'create_time'=>time()], ['id'=>$slot_setting['id']]);
+            } else {
+                pdo_insert('yk_volunteers_settings', $data);
+            }           
         exit(json_encode(['status'=>1, 'msg'=>'时段名称设置已保存']));
     }
 
     if($_GPC['op'] == 'save_slot_times' && $_W['ispost']){
-        $slot_times = $_GPC['slot_times'] ?? [];
-        if(!empty($slot_times)){
-            $exist = pdo_get('yk_volunteers_settings', ['uniacid'=>$_W['uniacid'], 'key'=>'slot_times']);
-            $data = [
-                'uniacid' => $_W['uniacid'],
-                'key' => 'slot_times',
-                'value' => json_encode($slot_times, JSON_UNESCAPED_UNICODE),
-            ];
-            if($exist){
-                pdo_update('yk_volunteers_settings', ['value'=>$data['value']], ['id'=>$exist['id']]);
-            } else {
+        $slot_time = $_GPC['slot_times'] ?? [];
+        $data = [
+            'uniacid' => $weid,
+            'key' => 'slot_times',
+            'value' => json_encode($slot_time, JSON_UNESCAPED_UNICODE),
+            'create_time'=>time()
+        ];
+        if(!empty($slot_times_setting)){
+                pdo_update('yk_volunteers_settings', ['value'=>$data['value'],'create_time'=>time()], ['id'=>$slot_times_setting['id']]);
+        } else {
                 pdo_insert('yk_volunteers_settings', $data);
-            }
-            exit(json_encode(['status'=>1,'msg'=>'保存成功']));
         }
-        exit(json_encode(['status'=>0,'msg'=>'参数为空']));
+        exit(json_encode(['status'=>1,'msg'=>'签到有效时间段设置成功']));
     }
 
     // 默认显示页面（可选择返回模板）
