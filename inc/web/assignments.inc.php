@@ -206,6 +206,17 @@ elseif ($op == 'batch_uncheckin') {
     exit(json_encode(['status' => 'success']));
 }
 
+// 撤销签到按钮
+elseif ($op == 'cancel_leave') {
+    $id = intval($_GPC['id']);
+    $item = pdo_get($table_assignments,['id'=>$id,'uniacid'=>$_W['uniacid'],'status'=>'leave']);
+    if(empty($item)) message('记录不存在或没有请假！',referer(),'error');
+    // 更新排班
+    pdo_update('yk_volunteers_assignments', ['status'=>'scheduled', 'leave_reason'=>''], ['id'=>$id,'uniacid'=>$_W['uniacid']]);
+
+    message('撤销请假成功！',referer(),'success');
+}
+
 /**
  * 自动生成一周排班
  * @param string $start_date 本周起始日期 YYYY-MM-DD（周一）

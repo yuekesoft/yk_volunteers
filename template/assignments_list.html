@@ -258,11 +258,12 @@
                         <td>{$item['volunteer_name']}</td>
                         <td>{$item['volunteer_child_class']}</td>
                         <td>{if $item['role'] == 'primary'} 主值 {elseif $item['role'] == 'substitute'} 替补 {else} - {/if}</td>
-                        <td>{if $item['status'] == 'scheduled'} 已安排 {elseif $item['status'] == 'cancelled'} 已取消 {elseif $item['status'] == 'completed'} 已完成 {else} - {/if}</td>
+                        <td>{if $item['status'] == 'scheduled'} 已安排 {elseif $item['status'] == 'cancelled'} 已取消 {elseif $item['status'] == 'completed'} 已完成 {elseif $item['status']=='leave'} 已请假 {elseif $item['status'] == 'replaced'}已替班{else} - {/if}</td>
                         <td>{if $item['checked_in']}<i class="fa fa-check-circle" style="margin-right:5px;"></i>已签到{else}未签到{/if}</td>
                         <td>
                             <a href="{php echo $this->createWebUrl('assignments',['op'=>'edit','id'=>$item['id']]);}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a>
                             <a href="{php echo $this->createWebUrl('assignments',['op'=>'delete','id'=>$item['id'],'volunteer_id'=>$item['volunteer_id']]);}" class="btn btn-danger btn-sm" onclick="return confirm('确定删除？');"><i class="fa fa-trash"></i></a>
+                            <a href="{php echo $this->createWebUrl('assignments',['op'=>'cancel_leave','id'=>$item['id']]);}" class="btn btn-primary btn-sm">撤销请假</a>
                         </td>
                     </tr>
                     {/loop}

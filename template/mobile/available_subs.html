@@ -1,0 +1,61 @@
+<!-- available_subs.html -->
+{template 'common/header'}
+
+<div class="panel panel-default">
+    <div class="panel-heading">可替班任务</div>
+    <div class="panel-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>时段</th>
+                    <th>原家长</th>
+                    <th>班级</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (!empty($list)) { foreach ($list as $row) { ?>
+                <tr>
+                    <td>
+                        <?php echo $row['date'];?>
+                    </td>
+                    <td>
+                        {if $row['slot_code']=='morning'}早上 {elseif $row['slot_code']=='afternoon'}傍晚 {elseif $row['slot_code']=='evening'}晚上 {else}{$row['slot_code']}{/if}
+                    </td>
+                    <td>
+                        <?php echo $row['volunteer_name'];?>
+                    </td>
+                    <td>
+                        <?php echo $row['child_class'];?>
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-replace" data-id="<?php echo $row['id'];?>">我要替班</button>
+                    </td>
+                </tr>
+                <?php } } else { ?>
+                <tr>
+                    <td colspan="4">暂无待替班任务</td>
+                </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    require(['jquery'], function($) {
+        $('.btn-replace').on('click', function() {
+            if (!confirm('确认要替班吗？')) return;
+            var id = $(this).data('id');
+            $.post("<?php echo $this->createMobileUrl('replace')?>", {
+                schedule_id: id
+            }, function(resp) {
+                if (resp.message) alert(resp.message);
+                if (resp.status == 0) location.reload();
+            }, 'json');
+        });
+    });
+</script>
+
+{template 'common/footer'}

@@ -30,10 +30,14 @@
 
             $.post($(this).attr('action'), formData, function(res) {
                 if (res.status == 1) {
+                    // $('#bindMsg').html('<span style="color:green;">✅ 绑定成功！</span>');
+                    // setTimeout(() => {
+                    //     history.back();
+                    // }, 1500); 
                     $('#bindMsg').html('<span style="color:green;">✅ 绑定成功！</span>');
                     setTimeout(() => {
-                        history.back();
-                    }, 1500);
+                        window.location.href = "{php echo $this->createMobileUrl('assignments_list');}";
+                    }, 1200);
                 } else {
                     $('#bindMsg').html('<span style="color:red;">❌ ' + res.msg + '</span>');
                 }

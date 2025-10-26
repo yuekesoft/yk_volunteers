@@ -1,1 +1,121 @@
-{template 'common/header'} {template 'common/footer'}
+{template 'common/header'}
+<!-- template/web/manage.html -->
+<div class="main">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">请假与替班记录</h3>
+        </div>
+
+        <div class="panel-body">
+
+            <!-- 搜索栏 -->
+            <form action="" method="get" class="form-inline" role="form">
+                <input type="hidden" name="c" value="site">
+                <input type="hidden" name="a" value="entry">
+                <input type="hidden" name="m" value="{$_GPC['m']}">
+                <input type="hidden" name="do" value="Requests">
+
+                <div class="form-group">
+                    <label>家长姓名：</label>
+                    <input type="text" class="form-control" name="keyword" value="{$_GPC['keyword']}" placeholder="输入姓名搜索">
+                </div>
+
+                <!-- <div class="form-group">
+                    <label>状态：</label>
+                    <select name="status" class="form-control">
+                        <option value="">全部</option>
+                        <option value="leave" {if $_GPC['status']=='leave'}selected{/if}>请假中</option>
+                        <option value="replaced" {if $_GPC['status']=='replaced'}selected{/if}>已替班</option>
+                    </select>
+                </div> -->
+
+                <button type="submit" class="btn btn-primary">
+            <i class="fa fa-search"></i> 搜索
+          </button>
+            </form>
+            <hr>
+
+            <!-- 表格 -->
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:60px; text-align:center;">ID</th>
+                        <th>家长姓名</th>
+                        <th>日期</th>
+                        <th>值班时段</th>
+                        <th>请假原因</th>
+                        <th>状态</th>
+                        <th>替班人</th>
+                        <!-- <th style="width:120px; text-align:center;">操作</th> -->
+                    </tr>
+                </thead>
+                <tbody>
+                    {if !empty($list)} {loop $list $row}
+                    <tr>
+                        <td style="text-align:center;">{$row['id']}</td>
+                        <td>{$row['from_name']}({$row['from_class']})</td>
+                        <td>{$row['create_time']}</td>
+                        <td>{$row['s_date']} {if $row['s_slot_code'] == 'morning'} 早上 {elseif $row['s_slot_code'] == 'afternoon'} 旁晚 {elseif $row['s_slot_code'] == 'evening'} 晚上 {else} - {/if}</td>
+                        <td>{$row['reason']}</td>
+                        <td>
+                            {if $row['s_status']=='leave'}
+                            <span class="label label-warning">待替班</span> {elseif $row['s_status']=='replaced'}
+                            <span class="label label-success">已替班</span> {else}
+                            <span class="label label-info">{$row['s_status']}</span> {/if}
+                        </td>
+                        <td>
+                            {if !empty($row['to_name'])} {$row['to_name']}({$row['to_class']}) {else}
+                            <span class="text-muted">—</span> {/if}
+                        </td>
+                        <!-- <td style="text-align:center;">
+                            <a href="javascript:;" data-id="{$row['id']}" class="btn btn-default btn-xs btn-detail">
+                                <i class="fa fa-eye"></i> 详情
+                            </a>
+                            {if $row['status']=='leave'}
+                            <a href="javascript:;" data-id="{$row['id']}" class="btn btn-danger btn-xs btn-cancel-leave">
+                                <i class="fa fa-undo"></i> 撤销
+                            </a>
+                            {/if}
+                        </td> -->
+                    </tr>
+                    {/loop} {else}
+                    <tr>
+                        <td colspan="8" style="text-align:center; color:#999;">暂无请假记录</td>
+                    </tr>
+                    {/if}
+                </tbody>
+            </table>
+
+            <!-- 分页 -->
+            <div class="text-right">
+                {$pager}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    require(['jquery', 'util'], function($, util) {
+
+        // 查看详情
+        $('.btn-detail').on('click', function() {
+            var id = $(this).data('id');
+            util.message('这里可以打开详情页或弹窗查看具体记录 ID: ' + id, '', 'info');
+        });
+
+        // 撤销请假
+        $('.btn-cancel-leave').on('click', function() {
+            var id = $(this).data('id');
+            if (!confirm('确认撤销该请假吗？')) return;
+            $.post("{php echo $this->createWebUrl('Requests', ['op'=>'cancel'])}", {
+                id: id
+            }, function(resp) {
+                if (resp.message) alert(resp.message);
+                if (resp.status == 0) location.reload();
+            }, 'json');
+        });
+
+    });
+</script>
+
+{template 'common/footer'}

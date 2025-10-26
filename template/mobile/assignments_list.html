@@ -84,15 +84,14 @@
 
     <div style="margin-top:10px;">
         <a href="{php echo $this->createMobileUrl('bind_wechat');}" class="btn btn-success btn-block" style="width:180px;font-size:15px;">
-            <i class="fa fa-link"></i> 绑定我的微信
+            <i class="fa fa-link"></i> 绑定我的信息
         </a>
     </div>
     {/if}
     <div style="text-align:center;color:#3a0202; font-size:14px;">
-        {$holiday_notice}
+        <?php echo htmlspecialchars_decode($holiday_notice);?>
     </div>
 </div>
-
 
 <script>
     var currentWeekStart = '{php echo $_GPC["start_date"] ?: date("Y-m-d", strtotime("monday this week"));}';
@@ -185,8 +184,14 @@
                                 {else}{$s['slot_code']}{/if}
                             </strong> ：{$s['volunteer_name']}（{$s['volunteer_child_class']}）
                         </div>
+                        <?php if (!empty($volunteer) && $s['status']=='scheduled'){ ?>
 
-                        {if $s['checked_in']==1}
+                        <button class="btn btn-warning btn-leave" data-id="<?php echo $s['id']; ?>">请假</button>
+                        <?php } elseif ($s['status']=='leave') { ?>
+                        <span class="label label-info">待替班</span>
+                        <?php } elseif ($s['status']=='replaced') { ?>
+                        <span class="label label-success">已替班</span>
+                        <?php } ?> {if $s['checked_in']==1}
                         <div class="text-success" style="display:flex; align-items:center; margin-left:10px;">
                             <i class="fa fa-check-circle" style="margin-right:3px;"></i>
                             <span>已签到</span>
@@ -206,3 +211,21 @@
         {/if}
     </div>
 </div>
+
+<!-- ✅ 请假按钮 -->
+<script>
+    require(['jquery'], function($) {
+        $('.btn-leave').on('click', function() {
+            var id = $(this).data('id');
+            var reason = prompt('请输入请假原因（可选）:');
+            if (reason === null) return;
+            $.post("<?php echo $this->createMobileUrl('leave')?>", {
+                schedule_id: id,
+                reason: reason
+            }, function(resp) {
+                alert(resp.message);
+                if (resp.status == 0) location.reload();
+            }, 'json');
+        });
+    });
+</script>

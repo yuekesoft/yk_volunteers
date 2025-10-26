@@ -62,7 +62,7 @@ if ($current_slot=='morning'){
 }
 
 if (empty($assignment)) {
-    message("您今天没有安排在 {$current_text} 时段的排班", '', 'error');
+    message("您没有在 {$current_text} 时段的排班", $this->createMobileUrl('assignments_list'), 'error');
 }
 
 // 判断是否已签到

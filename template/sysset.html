@@ -37,8 +37,8 @@
         <form id="holidayNoticeForm" class="form-inline">
             <input type="hidden" name="op" value="save_holiday_notice">
             <div class="form-group" style="width:70%;">
-                <label>通知内容</label>
-                <input type="text" class="form-control" name="notice" value="{$holiday_notice}" style="width:100%;">
+                <label>通知内容</label> {php echo tpl_ueditor('notice',$holiday_notice);}
+                <!-- <input type="text" class="form-control" name="notice" value="{$holiday_notice}" style="width:100%;"> -->
             </div>
             <button type="submit" class="btn btn-success" style="margin-left:10px;margin-top:20px;">
                 <i class="fa fa-save"></i> 保存
@@ -179,10 +179,19 @@
         // 保存节假日通知
         $('#holidayNoticeForm').submit(function(e) {
             e.preventDefault();
-            var notice = $(this).find('input[name=notice]').val();
+            var content = '';
+            try {
+                if (typeof UE !== 'undefined' && UE.getEditor('notice')) {
+                    content = UE.getEditor('notice').getContent();
+                } else {
+                    content = $(this).find('textarea').val() || '';
+                }
+            } catch (err) {
+                content = $(this).find('textarea').val() || '';
+            }
             $.post("{php echo $this->createWebUrl('sysset'); }", {
                 op: 'save_holiday_notice',
-                notice: notice
+                notice: content
             }, function(res) {
                 try {
                     var data = JSON.parse(res);
