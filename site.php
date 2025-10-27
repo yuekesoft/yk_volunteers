@@ -24,10 +24,17 @@ class Yk_volunteersModuleSite extends WeModuleSite {
 
         if ($_W['ispost']) {
             // 校验归属
-            $schedule = pdo_get('yk_volunteers_assignments', ['id'=>$id]);
+            $schedule = pdo_get('yk_volunteers_assignments', ['id'=>$id,'uniacid' => $_W['uniacid']]);
             if (!$schedule) {
                 //iajax(-1, '记录不存在');
 				exit(json_encode(['status' => -1, 'message' => '记录不存在']));
+            }
+
+            // 取家长信息
+            $volunteer = pdo_get('yk_volunteers_volunteers', ['id'=>$schedule['volunteer_id'],'uniacid' => $_W['uniacid']]);
+            if (!$volunteer) {
+                //iajax(-1, '记录不存在');
+				exit(json_encode(['status' => -1, 'message' => '家长记录不存在']));
             }
             // if ($schedule['volunteer_id'] != $uid) {
             //     //iajax(-1, '你没有权限请假该排班');
@@ -44,7 +51,69 @@ class Yk_volunteersModuleSite extends WeModuleSite {
                 'update_time' => date('Y-m-d H:i:s')
             ], ['id'=>$id, 'uniacid' => $_W['uniacid']]);
 
+            // ========================
             // 可选：发送通知给管理员或班级群
+            // ========================
+
+            // 载入模板消息类
+            load()->classs('weixin.account');
+            $acc = WeAccount::create($_W['acid']);
+
+            // 取系统设置中的模板消息ID
+            $sysset_tmpl = pdo_get('yk_volunteers_settings', [
+                'uniacid' => $_W['uniacid'],
+                'key' => 'tmplmsg_id'
+            ]);
+            $tmplmsg_id = trim($sysset_tmpl['value']);
+
+            // 取管理员 openid
+            $sysset_admin = pdo_get('yk_volunteers_settings', [
+                'uniacid' => $_W['uniacid'],
+                'key' => 'admin_openid'
+            ]);
+            $admin_openid = trim($sysset_admin['value']);          
+
+            // 如果多个管理员，用逗号或换行分隔
+            $admin_openids = preg_split('/[,，\r\n]+/', $admin_openid, -1, PREG_SPLIT_NO_EMPTY);
+
+            // ========== 模板消息内容 ==========
+            $work_order_name = $reason . '请假'; // 工单名称
+            $initiator = $volunteer['name'] . '(' . $volunteer['child_class'] . ')'; // 发起人
+
+            // 时段文字
+            if ($schedule['slot_code'] == 'morning') {
+                $slot_text = '早上';
+            } elseif ($schedule['slot_code'] == 'afternoon') {
+                $slot_text = '傍晚';
+            } elseif ($schedule['slot_code'] == 'evening') {
+                $slot_text = '晚上';
+            } else {
+                $slot_text = '';
+            }
+
+            $project_name = $schedule['date'] . ' ' . $slot_text . ' 值日'; // 项目名称
+            $submit_time = date('Y-m-d H:i:s'); // 提交时间
+
+            $send_data = [
+                'thing8'  => ['value' => $work_order_name],
+                'thing10' => ['value' => $initiator],
+                'thing31' => ['value' => $project_name],
+                'time67'  => ['value' => $submit_time],
+            ];
+
+            // ========== 发送模板消息 ==========
+            if (!empty($tmplmsg_id) && !empty($admin_openids)) {
+                foreach ($admin_openids as $openid) {
+                    $openid = trim($openid);
+                    if (empty($openid)) continue;
+
+                    $res = $acc->sendTplNotice($openid, $tmplmsg_id, $send_data, '', '#173177');
+                }
+            } else {
+                // 若系统未配置模板ID或管理员openid，可记录提示日志
+                load()->func('logging');
+                logging_run('请假模板消息未发送：缺少 tmplmsg_id 或 admin_openid 设置'.$tmplmsg_id, 'warning', 'leave_notice');
+            }                
 
             //iajax(0, '请假成功');
 			exit(json_encode(['status' => 0, 'message' => '请假成功']));

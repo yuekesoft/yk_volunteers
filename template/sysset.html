@@ -45,13 +45,28 @@
         </form>
 
         <!-- ✅ 自动排班分页数量 -->
-        <h4><i class="fa fa-calendar"></i> 自动排班页面每页显示数量设置</h4>
+        <h4><i class="fa fa-book"></i> 自动排班页面每页显示数量设置</h4>
         <form id="auto_assign_page_sizeForm" class="form-inline" style="margin-bottom:15px;">
             <input type="hidden" name="op" value="save_auto_assign_page_size">
             <div class="form-group" style="width:70%;">
                 <input type="number" name="auto_assign_page_size" value="{$auto_assign_page_size}" class="form-control" min="20" style="width:100%;">
             </div>
             <button type="submit" class="btn btn-success" style="margin-left:10px;">
+                <i class="fa fa-save"></i> 保存
+            </button>
+        </form>
+
+        <!-- ✅ 通知消息设置 -->
+        <h4><i class="fa fa-fax"></i> 通知消息设置</h4>
+        <form id="tmplmsgForm" class="form-inline" style="margin-bottom:15px;">
+            <input type="hidden" name="op" value="save_tmplmsg">
+            <div class="form-group" style="width:70%;">
+                <input type="text" name="tmplmsg_id" value="{$tmplmsg_id}" class="form-control" min="20" style="width:100%;" placeholder="请输入微信模板消息ID">
+            </div>
+            <div class="form-group" style="width:70%; margin-top: 15px;">
+                <input type="text" name="admin_openid" value="{$admin_openid}" class="form-control" min="20" style="width:100%;" placeholder="请输入管理员的微信OpenID，可多个用逗号分隔">
+            </div>
+            <button type="submit" class="btn btn-success" style="margin-left:10px;margin-top:15px;">
                 <i class="fa fa-save"></i> 保存
             </button>
         </form>
@@ -228,6 +243,26 @@
         $('#saveSlotBtn').click(function() {
             $.post("{php echo $this->createWebUrl('sysset', ['op'=>'save_slots']);}", $('#slotForm').serialize(), function(res) {
                 alert(JSON.parse(res).msg);
+            });
+        });
+
+        // 保存模板消息设置
+        $('#tmplmsgForm').submit(function(e) {
+            e.preventDefault();
+            var tmplmsg_id = $(this).find('input[name=tmplmsg_id]').val();
+            var admin_openid = $(this).find('input[name=admin_openid]').val();
+            $.post("{php echo $this->createWebUrl('sysset'); }", {
+                op: 'save_tmplmsg',
+                tmplmsg_id: tmplmsg_id,
+                admin_openid: admin_openid
+            }, function(res) {
+                try {
+                    var data = JSON.parse(res);
+                    alert(data.msg);
+                } catch (e) {
+                    console.log(res);
+                    alert('操作失败');
+                }
             });
         });
 

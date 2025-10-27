@@ -40,6 +40,14 @@
      $auto_assign_page_size_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'auto_assign_page_size']); 
      $auto_assign_page_size = $auto_assign_page_size_setting ? $auto_assign_page_size_setting['value'] : 20;  
 
+     // ---------- 模板消息设置 ----------
+     $tmplmsg_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'tmplmsg_id']); 
+     $tmplmsg_id = $tmplmsg_setting ? $tmplmsg_setting['value'] : ''; 
+
+     $tmplmsg_openid_setting = pdo_get('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'admin_openid']); 
+     $admin_openid = $tmplmsg_openid_setting ? $tmplmsg_openid_setting['value'] : ''; 
+      
+
     // 读取时段名称设置
     $slot_setting = pdo_get('yk_volunteers_settings', ['uniacid' => $weid, 'key' => 'slot_labels']);
     $slot_labels = $slot_setting ? json_decode($slot_setting['value'], true) : [
@@ -89,6 +97,26 @@
         }
 
         exit(json_encode(['status'=>1,'msg'=>'自动排班分页显示数量设置已保存！']));
+    }
+
+    // 保存模板消息设置
+    if($op == 'save_tmplmsg'){
+        $tmplmsg_id = trim($_GPC['tmplmsg_id']);
+        $admin_openid = trim($_GPC['admin_openid']);
+
+        if($tmplmsg_setting){
+            pdo_update('yk_volunteers_settings', ['value'=>$tmplmsg_id,'create_time'=>time()], ['id'=>$tmplmsg_setting['id']]);
+        } else {
+            pdo_insert('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'tmplmsg_id','value'=>$tmplmsg_id,'create_time'=>time()]);
+        }
+
+        if($tmplmsg_openid_setting){
+            pdo_update('yk_volunteers_settings', ['value'=>$admin_openid,'create_time'=>time()], ['id'=>$tmplmsg_openid_setting['id']]);
+        } else {
+            pdo_insert('yk_volunteers_settings', ['uniacid'=>$weid,'key'=>'admin_openid','value'=>$admin_openid,'create_time'=>time()]);
+        }
+
+        exit(json_encode(['status'=>1,'msg'=>'模板消息设置已保存！']));
     }
 
     // 保存时段名称设置
