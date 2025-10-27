@@ -217,8 +217,12 @@
     require(['jquery'], function($) {
         $('.btn-leave').on('click', function() {
             var id = $(this).data('id');
-            var reason = prompt('请输入请假原因（可选）:');
-            if (reason === null) return;
+            var reason = prompt('请输入请假原因:');
+            if (reason === null) return; // 用户点击取消
+            if (!reason.trim()) {
+                alert('请填写请假原因！');
+                return;
+            }
             $.post("<?php echo $this->createMobileUrl('leave')?>", {
                 schedule_id: id,
                 reason: reason

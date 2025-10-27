@@ -1,0 +1,105 @@
+{template 'common/header'}
+
+<div style="max-width: 1000px; margin: 0 auto; font-family: 'Microsoft Yahei', sans-serif; line-height: 1.8; color: #333;">
+
+    <!-- 标题区 -->
+    <div style="background: linear-gradient(135deg, #2b7de9 0%, #58a6ff 100%); color: white; border-radius: 12px; padding: 30px 20px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.15);">
+        <h2 style="margin: 0; font-size: 26px; font-weight: 700;">
+            <i class="fa fa-users"></i> 志愿者家长自动排班系统
+        </h2>
+        <p style="margin-top: 10px; font-size: 15px; color: rgba(255,255,255,0.9);">
+            集「自动排班、扫码签到、请假替班」于一体的智能志愿服务系统
+        </p>
+    </div>
+
+    <!-- 自助签到 -->
+    <div style="background:#f7f9fc; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-qrcode"></i> 自助签到</h3>
+        <p>家长可通过手机微信扫码自动签到：</p>
+        <div style="background:#fff; border-left:4px solid #2b7de9; padding:10px 15px; border-radius:6px;">
+            <strong>签到地址：</strong><br>
+            <a href="https://www.yksign.com/app/index.php?i=2&c=entry&&do=self_check&m=yk_volunteers" target="_blank">
+          https://www.yksign.com/app/index.php?i=2&c=entry&&do=self_check&m=yk_volunteers
+        </a>
+        </div>
+        <div style="text-align:center; margin:15px 0;">
+            <img src="https://vuepressdocs.oss-cn-hangzhou.aliyuncs.com/docsimages/202510252157318.png" alt="签到二维码" style="max-width:180px; border-radius:10px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+            <p style="font-size:13px; color:#888;">扫码即可自动签到二维码</p>
+        </div>
+    </div>
+
+    <!-- 家长排班查看 -->
+    <div style="background:white; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-calendar-check-o"></i> 家长查看排班</h3>
+        <p>家长可通过以下地址查看本周及后续排班：</p>
+        <div style="background:#f7f9fc; border-left:4px solid #2b7de9; padding:10px 15px; border-radius:6px;">
+            <strong>查看地址：</strong><br>
+            <a href="https://www.yksign.com/app/index.php?i=2&c=entry&do=assignments_list&m=yk_volunteers" target="_blank">
+          https://www.yksign.com/app/index.php?i=2&c=entry&do=assignments_list&m=yk_volunteers
+        </a>
+        </div>
+        <ul style="margin-top:10px; padding-left:20px;">
+            <li>📅 默认显示本周排班</li>
+            <li>🔗 绑定孩子信息后，默认显示本人所有排班、并可请假及替班操作</li>
+            <li>📢 顶部通知信息可在后台系统设置中编辑</li>
+        </ul>
+    </div>
+
+    <!-- 请假与替班 -->
+    <div style="background:#f7f9fc; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-exchange"></i> 请假与替班机制</h3>
+        <ul style="padding-left:20px;">
+            <li>家长点击「请假」填写理由后，系统自动加入待替班列表。</li>
+            <li>其他家长可点击「我要替班」接手任务。</li>
+            <li>替班成功后，排班自动更新为“已替班”。</li>
+            <li>请假撤销可在后台「请假管理」中进行操作。</li>
+        </ul>
+    </div>
+
+    <!-- 自动排班规则 -->
+    <div style="background:white; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-cogs"></i> 自动排班规则</h3>
+        <ul style="padding-left:20px;">
+            <li>📂 家长列表通过 Excel 模板导入。</li>
+            <li>🔁 自动排班按家长顺序循环，并根据总安排次数倒序分配。</li>
+            <li>📆 可选择「周排班」或「月排班」（4 周）。</li>
+            <li>🏖 节假日设置后自动跳过排班日期。</li>
+            <li>🧹 后台提供数据清空功能，可清空排班与统计数据。</li>
+        </ul>
+    </div>
+
+    <!-- 特殊排班 -->
+    <div style="background:#f7f9fc; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-calendar-plus-o"></i> 特殊日期与手动排班</h3>
+        <p>管理员可在后台手动添加或调整特殊日期的排班，以应对临时任务或变动情况。</p>
+    </div>
+
+    <!-- 签到时间限制 -->
+    <div style="background:white; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-clock-o"></i> 扫码签到时间限制</h3>
+        <p>系统支持签到时段控制：</p>
+        <div style="background:#f7f9fc; padding:10px 15px; border-left:4px solid #2b7de9; border-radius:6px;">
+            示例：早上签到时段 6:30 - 7:30<br> 超出时间段将无法扫码签到。
+        </div>
+    </div>
+
+    <!-- 微信绑定 -->
+    <div style="background:#f7f9fc; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-user-circle"></i> 家长微信绑定与清除</h3>
+        <ul style="padding-left:20px;">
+            <li>家长绑定孩子信息后可使用签到、请假、替班功能。</li>
+            <li>如需解绑，在「家长管理」中清空 <code>openid</code> 字段即可。</li>
+        </ul>
+    </div>
+
+    <!-- 页脚 -->
+    <div style="text-align:center; margin: 30px 0; color:#666;">
+        <hr style="border:none; border-top:1px solid #ddd; width:80%;">
+        <p style="font-size:14px;">
+            <i class="fa fa-heart" style="color:#e74c3c;"></i> 让志愿排班更智能 · 让家长服务更轻松
+        </p>
+    </div>
+
+</div>
+
+{template 'common/footer'}

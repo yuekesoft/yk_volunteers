@@ -101,7 +101,8 @@
 			<entry title="候补/超额处理" do="waitlist" state="waitlist" direct="" />
 			<entry title="请假与替班管理" do="requests" state="requests" direct="" />
 			<entry title="报表" do="report" state="report" direct="" />
-			<entry title="系统设置" do="sysset" state="sysset" direct="" />			
+			<entry title="系统设置" do="sysset" state="sysset" direct="" />	
+			<entry title="系统简介" do="help" state="help" direct="" />			
 		</menu>
 
 	</bindings>
