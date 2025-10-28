@@ -2,7 +2,13 @@
 {template 'common/header'}
 
 <div class="panel panel-default">
-    <div class="panel-heading">可替班任务</div>
+    <div class="panel-heading" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>可替班任务</span>
+        <button class="btn btn-primary btn-sm" onclick="location.href='<?php echo $this->createMobileUrl('assignments_list')?>'">
+            返回排班列表
+        </button>
+    </div>
+
     <div class="panel-body">
         <table class="table table-striped">
             <thead>
@@ -47,14 +53,34 @@
     require(['jquery'], function($) {
         $('.btn-replace').on('click', function() {
             if (!confirm('确认要替班吗？')) return;
-            var id = $(this).data('id');
+
+            var $btn = $(this); // 当前按钮
+            var id = $btn.data('id');
+
+            // 禁用按钮，防止重复点击
+            $btn.prop('disabled', true);
+            var originalText = $btn.text();
+            $btn.html('<i class="fa fa-spinner fa-spin"></i> 正在替班…');
+
             $.post("<?php echo $this->createMobileUrl('replace')?>", {
                 schedule_id: id
             }, function(resp) {
                 if (resp.message) alert(resp.message);
-                if (resp.status == 0) location.reload();
-            }, 'json');
+                if (resp.status == 0) {
+                    location.reload();
+                } else {
+                    // 操作失败恢复按钮
+                    $btn.prop('disabled', false);
+                    $btn.html(originalText);
+                }
+            }, 'json').fail(function() {
+                // 网络异常恢复按钮
+                $btn.prop('disabled', false);
+                $btn.html(originalText);
+                alert('网络异常，请重试');
+            });
         });
+
     });
 </script>
 

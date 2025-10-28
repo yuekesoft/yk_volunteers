@@ -62,6 +62,7 @@
     }
 </style>
 
+<!-- 显示开头 按钮 -->
 <div class="week-nav" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin: 15px 0;">
     {if empty($volunteer)}
     <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
@@ -93,6 +94,58 @@
     </div>
 </div>
 
+<!-- 今天日期显示 -->
+<div class="today-date-container" style="display:flex; justify-content:space-between; align-items:center; 
+    margin-top:10px; padding:6px 15px; background-color:#f9f9f9; border-left:4px solid #007bff; border-radius:4px;margin: 0 15px;">
+
+    <div class="today-date" style="font-weight:bold; color:#333;">
+        今天：
+        <?php echo date('Y-m-d'); ?>（{php echo ['Sun'=>'周日','Mon'=>'周一','Tue'=>'周二','Wed'=>'周三','Thu'=>'周四','Fri'=>'周五','Sat'=>'周六'][date('D', strtotime(date('Y-m-d')))];}）
+    </div>
+
+    <div>
+        <button class="btn btn-primary btn-sm" onclick="location.href='<?php echo $this->createMobileUrl('availablesubs')?>'">
+            查看替班任务
+        </button>
+    </div>
+</div>
+
+<!-- 微擎风格请假弹窗 -->
+<div id="leaveModal" style="
+    display:flex;               /* flex 布局一直存在 */
+    justify-content:center; 
+    align-items:center; 
+    position:fixed; 
+    top:0; left:0; 
+    width:100%; height:100%; 
+    background:rgba(0,0,0,0.3); 
+    z-index:10000;
+    opacity:0;                 /* 初始透明隐藏 */
+    pointer-events:none;       /* 禁止点击 */
+    transition:opacity 0.2s;
+">
+    <div style="
+        background:#f0f8ff; 
+        padding:20px; 
+        border-radius:8px; 
+        width:280px; 
+        text-align:center; 
+        box-shadow:0 2px 8px rgba(0,0,0,0.2);
+    ">
+        <p style="margin-bottom:10px; font-weight:bold; font-size:16px; color:#333;">请输入请假原因</p>
+        <input type="text" id="leaveReasonInput" style="width:100%; padding:6px 8px; margin-bottom:15px; border:1px solid #ccc; border-radius:4px;">
+        <div style="display:flex; justify-content:space-between;">
+            <button id="cancelLeaveBtn" class="btn btn-default btn-sm" style="flex:1; margin-right:5px;">取消</button>
+            <button id="submitLeaveBtn" class="btn btn-primary btn-sm" style="flex:1; margin-left:5px;">提交</button>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<!-- 下一周按钮 -->
 <script>
     var currentWeekStart = '{php echo $_GPC["start_date"] ?: date("Y-m-d", strtotime("monday this week"));}';
     var hasData = <?php echo $has_data ? 'true' : 'false'; ?>;
@@ -156,7 +209,7 @@
     });
 </script>
 
-
+<!-- 列表显示 -->
 <div class="panel panel-default">
     <div class="panel-body">
         {if $has_data}
@@ -166,7 +219,6 @@
                 <div class="card-header">
                     {$date}（{php echo ['Sun'=>'周日','Mon'=>'周一','Tue'=>'周二','Wed'=>'周三','Thu'=>'周四','Fri'=>'周五','Sat'=>'周六'][date('D', strtotime($date))];}）
                 </div>
-
                 <div class="card-body">
                     {loop $slots $s}
                     <div class="slot-item {$s['slot_code']}" style="display: flex; align-items: center; justify-content: space-between;">
@@ -184,12 +236,13 @@
                                 {else}{$s['slot_code']}{/if}
                             </strong> ：{$s['volunteer_name']}（{$s['volunteer_child_class']}）
                         </div>
+
                         <?php if (!empty($volunteer) && $s['status']=='scheduled'){ ?>
 
                         <button class="btn btn-warning btn-leave" data-id="<?php echo $s['id']; ?>">请假</button>
-                        <?php } elseif ($s['status']=='leave') { ?>
-                        <span class="label label-info">待替班</span>
-                        <?php } elseif ($s['status']=='replaced') { ?>
+                        <?php } elseif (!empty($volunteer) && $s['status']=='leave') { ?>
+                        <span class="label label-info">待替班</span><button class="btn btn-warning btn-cancel-leave" data-id="<?php echo $s['id']; ?>">撤销请假</button>
+                        <?php } elseif (!empty($volunteer) && $s['status']=='replaced') { ?>
                         <span class="label label-success">已替班</span>
                         <?php } ?> {if $s['checked_in']==1}
                         <div class="text-success" style="display:flex; align-items:center; margin-left:10px;">
@@ -212,24 +265,96 @@
     </div>
 </div>
 
-<!-- ✅ 请假按钮 -->
+<!-- ✅ 请假按钮 撤销请假 -->
 <script>
     require(['jquery'], function($) {
+        // 请假按钮
         $('.btn-leave').on('click', function() {
-            var id = $(this).data('id');
-            var reason = prompt('请输入请假原因:');
-            if (reason === null) return; // 用户点击取消
-            if (!reason.trim()) {
-                alert('请填写请假原因！');
-                return;
-            }
-            $.post("<?php echo $this->createMobileUrl('leave')?>", {
-                schedule_id: id,
-                reason: reason
-            }, function(resp) {
-                alert(resp.message);
-                if (resp.status == 0) location.reload();
-            }, 'json');
+            var scheduleId = $(this).data('id');
+            $('#leaveReasonInput').val('');
+
+            // 显示弹窗
+            $('#leaveModal').css({
+                opacity: 1,
+                'pointer-events': 'auto'
+            });
+
+            // 提交按钮
+            $('#submitLeaveBtn').off('click').on('click', function() {
+                var reason = $('#leaveReasonInput').val().trim();
+                if (!reason) {
+                    alert('请填写请假原因！');
+                    return;
+                }
+
+                var $btn = $('.btn-leave[data-id="' + scheduleId + '"]');
+                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> 正在提交…');
+
+                $.post("<?php echo $this->createMobileUrl('leave')?>", {
+                    schedule_id: scheduleId,
+                    reason: reason
+                }, function(resp) {
+                    //util.message(resp.message, '', resp.status == 0 ? 'success' : 'error');
+                    if (resp.status == 0) {
+                        location.reload();
+                    } else {
+                        $btn.prop('disabled', false).html('请假');
+                    }
+                }, 'json').fail(function() {
+                    $btn.prop('disabled', false).html('请假');
+                    alert('网络异常，请重试');
+                });
+
+                // 隐藏弹窗
+                $('#leaveModal').css({
+                    opacity: 0,
+                    'pointer-events': 'none'
+                });
+            });
+
+            // 取消按钮
+            $('#cancelLeaveBtn').off('click').on('click', function() {
+                $('#leaveModal').css({
+                    opacity: 0,
+                    'pointer-events': 'none'
+                });
+            });
         });
+
+
+        // 撤销请假
+        $('.btn-cancel-leave').on('click', function() {
+            var $btn = $(this); // 当前按钮
+            var id = $btn.data('id');
+
+            // 禁用按钮，防止重复点击
+            $btn.prop('disabled', true);
+            // 保存原始文字
+            var originalText = $btn.text();
+            // 改为“正在撤销…”并加转圈
+            $btn.html('<i class="fa fa-spinner fa-spin"></i> 正在撤销…');
+
+            $.post("<?php echo $this->createMobileUrl('cancelleave')?>", {
+                schedule_id: id,
+            }, function(resp) {
+                // 提示信息
+                alert(resp.message);
+
+                if (resp.status == 0) {
+                    // 成功刷新页面
+                    location.reload();
+                } else {
+                    // 失败恢复按钮
+                    $btn.prop('disabled', false);
+                    $btn.html(originalText);
+                }
+            }, 'json').fail(function() {
+                // 请求失败也恢复按钮
+                $btn.prop('disabled', false);
+                $btn.html(originalText);
+                alert('网络异常，请重试');
+            });
+        });
+
     });
 </script>
