@@ -279,27 +279,43 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $('#btn_auto_assign').click(function() {
+            var btn = $(this);
             var start_date = $('#auto_date').val();
             var mode = $('#auto_mode').val();
+
             if (!start_date) {
                 alert('请选择起始日期');
                 return;
             }
 
-            if (confirm('确认生成' + (mode == 'week' ? '本周' : '本月') + '排班吗？')) {
-                $.post("<?php echo $this->createWebUrl('assignments',['op'=>'auto_assign']); ?>", {
-                        start_date: start_date,
-                        mode: mode
-                    },
-                    function(resp) {
-                        if (resp.status == 1) {
-                            alert(resp.message);
-                            location.reload();
-                        } else {
-                            alert('排班失败：' + resp.msg);
-                        }
-                    }, 'json');
+            // 根据 mode 设置显示文字
+            var label = (mode == 'week' ? '本周' : '本月');
+
+            if (!confirm('确认生成' + label + '排班吗？')) {
+                return;
             }
+
+            // 禁用按钮，防止重复点击
+            btn.prop('disabled', true).text('生成中...');
+
+            $.post("<?php echo $this->createWebUrl('assignments', ['op' => 'auto_assign']); ?>", {
+                start_date: start_date,
+                mode: mode
+            }, function(resp) {
+                // 恢复按钮
+                btn.prop('disabled', false).text('自动排班');
+
+                if (resp.status == 1) {
+                    alert(resp.message);
+                    location.reload();
+                } else {
+                    alert('排班失败：' + (resp.msg || '未知错误'));
+                }
+            }, 'json').fail(function() {
+                // 网络异常时也恢复按钮
+                btn.prop('disabled', false).text('自动排班');
+                alert('网络异常，请稍后再试。');
+            });
         });
     });
 </script>
