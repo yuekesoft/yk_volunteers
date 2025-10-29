@@ -11,6 +11,9 @@
             <li class="{if $tab == 'tab_summary'}active{/if}">
                 <a href="#tab_summary" data-toggle="tab"><i class="fa fa-users"></i> 家长签到次数统计</a>
             </li>
+            <li class="{if $tab == 'tab_auto_notice_log'}active{/if}">
+                <a href="#tab_auto_notice_log" data-toggle="tab"> 自动发送信息日志</a>
+            </li>
         </ul>
 
         <div class="tab-content" style="padding-top:15px;">
@@ -18,6 +21,7 @@
             <div class="tab-pane {if $tab == 'tab_detail'}active{/if}" id="tab_detail">
                 <form id="form_detail" method="post" action="{php echo $this->createWebUrl('report');}">
                     <input type="hidden" name="tab" value="tab_detail">
+                    <input type="hidden" name="tabsearch" value="tabsearch">
 
                     <div class="form-inline" style="margin-bottom:15px;">
                         <label>开始日期：</label>
@@ -42,6 +46,7 @@
             <div class="tab-pane {if $tab == 'tab_summary'}active{/if}" id="tab_summary">
                 <form id="form_summary" method="post" action="{php echo $this->createWebUrl('report');}">
                     <input type="hidden" name="tab" value="tab_summary">
+                    <input type="hidden" name="tabsearch" value="tabsearch">
 
                     <div class="form-inline" style="margin-bottom:15px;">
                         <label>开始日期：</label>
@@ -60,6 +65,60 @@
                         {template 'report_summary_list'}
                     </div>
                 </form>
+            </div>
+
+            <!-- 自动发送消息日志显示 -->
+            <div class="tab-pane {if $tab == 'tab_auto_notice_log'}active{/if}" id="tab_auto_notice_log">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-inline mb-3" style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                            <label style="white-space:nowrap;">选择日志文件：</label>
+                            <select id="log_file" class="form-control" style="min-width:260px; width:320px;">
+                                <?php foreach ($files as $f): ?>
+                                    <option value="<?php echo basename($f); ?>"><?php echo basename($f); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button id="refresh_log" class="btn btn-default btn-sm">刷新</button>
+                        </div>
+
+
+                        <pre id="log_content" style="max-height:600px; overflow:auto; background:#f9f9f9; padding:10px;">
+                        </pre>
+                    </div>
+                </div>
+
+                <script>
+                    $(function() {
+                        function loadLog() {
+                            const file = $('#log_file').val();
+                            $('#log_content').text('加载中...');
+                            $.get("<?php echo $this->createWebUrl('report'); ?>", {
+                                file: file,
+                                'tabsearch': 'auto_notice_log'
+                            }, function(resp) {
+                                try {
+                                    // 有时候 PHP 会输出 BOM 或多余空格，我们先清理一下
+                                    resp = resp.trim();
+                                    //$('#log_content').html(resp);
+                                    const data = JSON.parse(resp);
+                                    if (data.status == 1) {
+                                        $('#log_content').html(data.data);
+                                    } else {
+                                        $('#log_content').text('❌ ' + data.msg);
+                                    }
+                                } catch (e) {
+                                    console.error('解析错误:', e, resp);
+                                    $('#log_content').text('⚠️ 无法解析日志内容');
+                                }
+                            });
+                        }
+
+                        loadLog();
+                        $('#log_file').change(loadLog);
+                        $('#refresh_log').click(loadLog);
+                    });
+                </script>
+
             </div>
         </div>
     </div>

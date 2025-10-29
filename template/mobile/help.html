@@ -47,14 +47,16 @@
 
     <!-- 消息提醒 -->
     <div style="background:#f7f9fc; border-radius: 12px; margin-top: 25px; padding: 20px 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
-        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-bullhorn"></i> 排班消息手工发送提醒</h3>
+        <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-bullhorn"></i> 排班消息手工发送提醒消息</h3>
         <div style="background:#f7f9fc; border-left:4px solid #2b7de9; padding:10px 15px; border-radius:6px;">
             <strong>查看地址：</strong><br>
-            <a href="https://www.yksign.com/web/index.php?c=site&a=entry&w7i=2&do=cron_notice&module_name=yk_volunteers" target="_blank" style="word-break: break-all; overflow-wrap: break-word; display: inline-block;">
-                https://www.yksign.com/web/index.php?c=site&a=entry&w7i=2&do=cron_notice&module_name=yk_volunteers
+            <a href="https://www.yksign.com/app/index.php?i=2&c=entry&do=cron_notice&m=yk_volunteers" target="_blank" style="word-break: break-all; overflow-wrap: break-word; display: inline-block;">
+                https://www.yksign.com/app/index.php?i=2&c=entry&do=cron_notice&m=yk_volunteers
             </a>
         </div>
-        <p>管理员可复制此地址，到电脑浏览器打开，就可以对第二天排班的家长进行消息提醒。</p>
+        <p>管理员可点击此地址，就可以对排班的家长进行消息提醒。（需关注公众号的家长）</p>
+        <p>根据后台设置的提前天数，对相应排班家长发送消息</p>
+        <p>配合设置计划任务，可以设定每天几点检测需发送消息家长，自动发送消息</p>
     </div>
 
 
@@ -64,8 +66,7 @@
         <ul style="padding-left:20px;">
             <li>家长点击「请假」填写理由后，系统自动加入待替班列表。</li>
             <li>其他家长可点击「我要替班」接手任务。</li>
-            <li>替班成功后，排班自动更新为“已替班”。</li>
-            <li>请假撤销可在后台「请假管理」中进行操作。</li>
+            <li>替班成功后，排班自动更新为“已替班”，自动加入到已替班家长排班列表。</li>
         </ul>
     </div>
 
@@ -101,7 +102,7 @@
         <h3 style="color:#2b7de9; font-weight:600;"><i class="fa fa-user-circle"></i> 家长微信绑定与清除</h3>
         <ul style="padding-left:20px;">
             <li>家长绑定孩子信息后可使用签到、请假、替班功能。</li>
-            <li>如需解绑，在「家长管理」中清空 <code>openid</code> 字段即可。</li>
+            <li>如需解绑，需管理员在系统后台「家长管理」中清空 <code>openid</code> 字段即可。</li>
         </ul>
     </div>
 

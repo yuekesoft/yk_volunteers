@@ -200,13 +200,38 @@ if ($tab == 'tab_summary') {
 }
 
 // ========== AJAX 支持 ==========
-if ($_W['isajax']) {
+if ($_W['isajax'] && $_GPC['tabsearch']=='tabsearch') {
     if ($tab == 'tab_detail') {
         include $this->template('report_detail_list'); // 只返回当前 tab 内容
     } else {
         include $this->template('report_summary_list');
     }
     exit;
+}
+
+// 日志记录显示
+$logDir = IA_ROOT . '/data/logs/';
+$pattern = $logDir . 'cron_notice_*.php'; // ✅ 注意这里是 .php
+$files = glob($pattern);
+rsort($files);
+
+if ($_W['isajax'] && $_GPC['tabsearch'] == 'auto_notice_log') {
+    $file = $_GPC['file'];
+    $path = realpath($logDir . basename($file));
+
+    // 安全性检查，防止越权访问
+    if (strpos($path, realpath($logDir)) !== 0) {
+        die(json_encode(['status' => 0, 'msg' => '非法路径']));
+    }
+
+    if (file_exists($path)) {
+        // ✅ 强制按文本读取，而非执行
+        $content = file_get_contents($path);
+        $content = htmlspecialchars($content, ENT_QUOTES);
+        die(json_encode(['status' => 1, 'data' => $content]));
+    } else {
+        die(json_encode(['status' => 0, 'msg' => '日志文件不存在']));
+    }
 }
 
 // ========== 普通访问，加载整个页面 ==========
