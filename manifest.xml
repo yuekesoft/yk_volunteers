@@ -8,17 +8,13 @@
 
 		<version><![CDATA[1.0.0]]></version>
 
-		<ability><![CDATA[xx]]></ability>
+		<ability><![CDATA[志愿者值日排班系统，自动排班，执勤提前一天提醒。可以请假，可以替班等功能。]]></ability>
 
-		<type><![CDATA[xx]]></type>
-
-		<description><![CDATA[志愿者值日排班系统]]></description>
+		<description><![CDATA[志愿者值日排班系统，自动排班，执勤提前一天提醒。可以请假，可以替班等功能。]]></description>
 
 		<author><![CDATA[Mob446221402609]]></author>
 
-		<url><![CDATA[xx]]></url>
-
-		<setting><![CDATA[xx]]></setting>
+		<url><![CDATA[]]></url>
 
 	</application>
 
@@ -81,7 +77,7 @@
 		<rule embed="false" />
 
 	<supports>
-
+			<item type="branch" />
 			<item type="app" />
 	</supports>
 
@@ -89,10 +85,6 @@
 
 	
 	<bindings>
-
-		<cover>
-			<entry title="应用入口" do="index" state="index" direct="" />
-		</cover>
 
 		<menu>
 			<entry title="志愿者管理" do="volunteers" state="volunteers" direct="" />
@@ -107,7 +99,7 @@
 
 	</bindings>
 
-	<install><![CDATA[]]></install>
+	<install><![CDATA[install.php]]></install>
 	<uninstall><![CDATA[]]></uninstall>
 	<upgrade><![CDATA[]]></upgrade>
 </manifest>

@@ -2,7 +2,7 @@
 /**
  * yk_volunteers模块微站定义
  *
- * @author yuekesoft
+ * @author Mob446221402609
  * @url
  */
 defined('IN_IA') or exit('Access Denied');
